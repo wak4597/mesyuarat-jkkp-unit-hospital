@@ -486,31 +486,42 @@
             </div>
 
             <!-- Login Modal (Role-Based Access) -->
-            <div v-if="showLoginModal" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-75 no-print">
-                <div class="bg-white p-8 rounded-lg shadow-xl max-w-md w-full m-4">
-                    <h2 class="text-2xl font-bold mb-2 text-gray-800">Log Masuk Sistem</h2>
-                    <p class="text-sm text-gray-600 mb-6">Sila pilih nama anda untuk menentukan tahap akses bagi mesyuarat ini.</p>
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Pilih Nama Pengguna:</label>
-                        <select v-model="currentUser" class="w-full border border-gray-300 rounded-md p-3 text-base outline-none focus:border-blue-500">
-                            <option :value="null" disabled>-- Sila Pilih --</option>
-                            <option v-for="(pegawai, idx) in senaraiPegawai" :key="'login-'+idx" :value="pegawai">
-                                {{ pegawai.nama }} ({{ pegawai.shortName }})
-                            </option>
-                        </select>
-                    </div>
-                    <button @click="login" :disabled="!currentUser" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded transition-colors disabled:bg-gray-400">
-                        Masuk
-                    </button>
-                </div>
-            </div>
+<div v-if="showLoginModal" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-75 no-print">
+    <div class="bg-white p-8 rounded-lg shadow-xl max-w-md w-full m-4">
+        <h2 class="text-2xl font-bold mb-2 text-gray-800">Log Masuk Sistem</h2>
+        
+        <!-- Step 1: Google Authentication -->
+        <div v-if="!googleAuthenticated">
+            <p class="text-sm text-gray-600 mb-6">Sila sahkan identiti anda menggunakan akaun Google untuk mengakses sistem ini.</p>
+            <button @click="loginWithGoogle" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded transition-colors">
+                Sahkan Identiti (Google)
+            </button>
+            <p v-if="loginError" class="text-red-500 text-xs mt-3 font-bold">{{ loginError }}</p>
+        </div>
 
+        <!-- Step 2: Role Selection -->
+        <div v-else>
+            <p class="text-sm text-green-600 mb-4 font-bold">Identiti disahkan: {{ loggedInEmail }}</p>
+            <p class="text-sm text-gray-600 mb-6">Sila pilih nama anda untuk menentukan tahap akses mesyuarat.</p>
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Pilih Nama Pengguna:</label>
+                <select v-model="currentUser" class="w-full border border-gray-300 rounded-md p-3 text-base outline-none focus:border-blue-500">
+                    <option :value="null" disabled>-- Sila Pilih --</option>
+                    <option v-for="(pegawai, idx) in senaraiPegawai" :key="'login-'+idx" :value="pegawai">
+                        {{ pegawai.nama }} ({{ pegawai.shortName }})
+                    </option>
+                </select>
+            </div>
+            <button @click="login" :disabled="!currentUser" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded transition-colors disabled:bg-gray-400">
+                Masuk ke Sistem
+            </button>
         </div>
     </div>
+</div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Setup Firebase Configurations from Environment
@@ -538,6 +549,9 @@
             data() {
                 return {
                     showLoginModal: true,
+					googleAuthenticated: false,
+					loggedInEmail: '',
+					loginError: '',
                     currentUser: null,
                     userRole: 'urusetia',
                     activeTab: 'butiran',
@@ -653,11 +667,6 @@
 
                 try {
                     // Authenticate
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await signInWithCustomToken(auth, __initial_auth_token);
-                    } else {
-                        await signInAnonymously(auth);
-                    }
 
                     // Urus Meeting ID dari URL
                     const urlParams = new URLSearchParams(window.location.search);
@@ -707,6 +716,31 @@
                 }
             },
             methods: {
+				async loginWithGoogle() {
+    const provider = new GoogleAuthProvider();
+    try {
+        const result = await signInWithPopup(auth, provider);
+        const email = result.user.email;
+        
+        // ADD YOUR COLLEAGUES' EMAILS HERE:
+        const allowedEmails = [
+            'your.email@gmail.com', 
+            'colleague1@gmail.com', 
+            'colleague2@moh.gov.my'
+        ];
+        
+        if (allowedEmails.includes(email)) {
+            this.googleAuthenticated = true;
+            this.loggedInEmail = email;
+            this.loginError = '';
+        } else {
+            this.loginError = "Akses ditolak: Emel anda tidak dibenarkan.";
+            await signOut(auth);
+        }
+    } catch (error) {
+        this.loginError = "Ralat log masuk: " + error.message;
+    }
+},
                 login() {
                     if (!this.currentUser) return;
                     

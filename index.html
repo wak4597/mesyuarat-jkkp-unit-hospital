@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Mesyuarat JKKP Hospital</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <style>
+        body { font-family: 'Arial', sans-serif; background-color: #f1f5f9; }
+        
+        /* Tab Styling */
+        .tab-btn { transition: all 0.2s; }
+        .tab-active { border-bottom: 2px solid #2563eb; color: #2563eb; font-weight: 600; }
+        
+        /* Document Styles for Word Export & Print */
+        .doc-view { background: white; padding: 2rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); max-width: 1000px; margin: 0 auto; }
+        .doc-table { width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; }
+        .doc-table th, .doc-table td { border: 1px solid #000; padding: 8px; vertical-align: top; text-align: left; font-size: 11pt; }
+        .doc-table th { font-weight: bold; }
+        
+        @media print {
+            body { background-color: white; }
+            .no-print { display: none !important; }
+            .doc-view { box-shadow: none; padding: 0; max-width: 100%; }
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+    <div id="app" class="min-h-screen flex flex-col">
+        <!-- Header & Nav (No Print) -->
+        <div class="bg-white shadow-sm border-b border-gray-200 no-print sticky top-0 z-10">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16 items-center">
+                    <h1 class="text-xl font-bold text-gray-900">Mesyuarat JKKP Hospital</h1>
+                    <div class="flex space-x-1 border-b border-gray-200">
+                        <button v-if="userRole === 'urusetia'" @click="activeTab = 'butiran'" :class="['px-4 py-4 text-sm tab-btn hover:bg-gray-50', activeTab === 'butiran' ? 'tab-active' : 'text-gray-500']">1. Butiran Mesyuarat</button>
+                        <button @click="activeTab = 'daftar'" :class="['px-4 py-4 text-sm tab-btn hover:bg-gray-50', activeTab === 'daftar' ? 'tab-active' : 'text-gray-500']">2. Permohonan</button>
+                        <button v-if="userRole === 'urusetia'" @click="activeTab = 'agenda'" :class="['px-4 py-4 text-sm tab-btn hover:bg-gray-50', activeTab === 'agenda' ? 'tab-active' : 'text-gray-500']">3. Senarai Premis</button>
+                        <button v-if="userRole === 'urusetia'" @click="activeTab = 'mesyuarat'" :class="['px-4 py-4 text-sm tab-btn hover:bg-gray-50', activeTab === 'mesyuarat' ? 'tab-active' : 'text-gray-500']">4. Keputusan Mesyuarat</button>
+                        <button v-if="userRole === 'urusetia'" @click="activeTab = 'minit'" :class="['px-4 py-4 text-sm tab-btn hover:bg-gray-50', activeTab === 'minit' ? 'tab-active' : 'text-gray-500']">5. Minit Mesyuarat</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-grow p-4 md:p-8">
+            
+            <!-- Share Link Banner -->
+            <div class="max-w-5xl mx-auto bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex flex-col md:flex-row items-center justify-between no-print gap-4 shadow-sm">
+                <div>
+                    <h3 class="text-sm font-bold text-blue-800">Kolaborasi Masa Nyata (Live Share)</h3>
+                    <p class="text-xs text-blue-600 mt-1">Kongsi pautan ini kepada Pegawai Proses untuk mengisi permohonan di peranti masing-masing. Data akan disegerakkan secara automatik.</p>
+                </div>
+                <div class="flex gap-2 items-center w-full md:w-auto">
+                    <input type="text" readonly :value="shareLink" class="bg-white border border-blue-300 text-xs rounded p-2 flex-grow md:w-72 text-gray-600 outline-none focus:border-blue-500" @focus="$event.target.select()">
+                    <button @click="copyLink" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-4 py-2 rounded font-medium transition-colors whitespace-nowrap">
+                        {{ copied ? 'Berjaya Disalin!' : 'Salin Pautan' }}
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB 1: BUTIRAN MESYUARAT -->
+            <div v-show="activeTab === 'butiran'" class="max-w-5xl mx-auto">
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-8">
+                    <h2 class="text-lg font-bold mb-4 border-b pb-2">Maklumat Asas Mesyuarat</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1"> Mesyuarat JKKP Bil.</label>
+                                <input v-model="butiran.bil" type="text" class="w-full border border-gray-300 rounded-md p-2" placeholder="Cth: 24/2026">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tarikh</label>
+                                <input v-model="butiran.tarikh" type="text" class="w-full border border-gray-300 rounded-md p-2" placeholder="Cth: 30 Disember 2026">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Masa</label>
+                                <input v-model="butiran.masa" type="text" class="w-full border border-gray-300 rounded-md p-2" placeholder="Cth: 9.00 pagi hingga 1.00 ptg">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tempat</label>
+                                <textarea v-model="butiran.tempat" rows="4" class="w-full border border-gray-300 rounded-md p-2" placeholder="Sila masukkan lokasi mesyuarat..."></textarea>
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Pengerusi Mesyuarat</label>
+                                <input v-model="butiran.pengerusi" type="text" class="w-full border border-gray-300 rounded-md p-2" placeholder="Nama Pengerusi">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Pencatat Minit</label>
+                                <input v-model="butiran.pencatat" type="text" class="w-full border border-gray-300 rounded-md p-2" placeholder="Nama Pencatat">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                    <h2 class="text-lg font-bold mb-4 border-b pb-2">Kehadiran Ahli Mesyuarat</h2>
+                    <p class="text-sm text-gray-500 mb-4">Senarai ini akan dipaparkan secara berasingan di muka depan dokumen Minit Mesyuarat.</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
+                        <div v-for="(pegawai, index) in senaraiPegawai" :key="index" class="flex items-center justify-between p-2 hover:bg-gray-50 rounded border border-transparent hover:border-gray-200">
+                            <span class="text-sm font-medium text-gray-800 truncate pr-2 w-3/5">{{ pegawai.nama }}</span>
+                            <select v-model="pegawai.status" class="w-2/5 border border-gray-300 rounded p-1 text-sm bg-white">
+                                <option value="Hadir">Hadir</option>
+                                <option value="Tidak Hadir">Tidak Hadir dengan Maaf</option>
+                                <option value="Urusetia">Urusetia</option>
+                                <option value="Tiada">Tiada/Sembunyi</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Tambah pegawai baru custom jika tiada dalam senarai -->
+                    <div class="mt-6 border-t pt-4 flex gap-2">
+                        <input v-model="pegawaiBaru" type="text" class="flex-grow border border-gray-300 rounded-md p-2 text-sm" placeholder="Nama Pegawai Baru...">
+                        <button @click="tambahPegawai" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-md text-sm font-medium">Tambah Ahli Baru</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: PERMOHONAN UNTUK DIBENTANGKAN -->
+            <div v-show="activeTab === 'daftar'" class="max-w-5xl mx-auto">
+                <div class="bg-white p-6 rounded-lg shadow-sm mb-8 border border-gray-200">
+                    <h2 class="text-lg font-bold mb-4 border-b pb-2">Tambah Permohonan Baru</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Pegawai Proses</label>
+                            <select v-model="form.pegawai" class="w-full border border-gray-300 rounded-md p-2">
+                                <option value="" disabled>-- Pilih Pegawai --</option>
+                                <option v-for="(pegawai, idx) in senaraiPegawai" :key="'dropdown-'+idx" :value="pegawai.shortName">
+                                    {{ pegawai.shortName }}
+                                </option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Kategori Permohonan</label>
+                            <select v-model="form.kategori" class="w-full border border-gray-300 rounded-md p-2">
+                                <option value="Berbangkit">Permohonan Berbangkit</option>
+                                <option value="Baru">Pembentangan Baru</option>
+                                <option value="Hal-hal Lain">Hal-hal Lain</option>
+                            </select>
+                        </div>
+                        <div v-if="form.kategori !== 'Hal-hal Lain'">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Jenis Borang</label>
+                            <select v-model="form.borang" class="w-full border border-gray-300 rounded-md p-2">
+                                <option value="Borang 1">Borang 1</option>
+                                <option value="Borang 5">Borang 5</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tarikh Terima</label>
+                            <input v-model="form.tarikhTerima" type="text" class="w-full border border-gray-300 rounded-md p-2" placeholder="Cth: 14 Ogos 2026">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Premis / Hospital</label>
+                            <input v-model="form.nama" type="text" class="w-full border border-gray-300 rounded-md p-2">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">No. Fail</label>
+                            <input v-model="form.noFail" type="text" class="w-full border border-gray-300 rounded-md p-2" placeholder="Cth: KKM 87/A2/1-3/...">
+                        </div>
+                        <div class="md:col-span-2 lg:col-span-3">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Butiran Peluasan atau Pengubahan</label>
+                            <textarea v-model="form.butiran" rows="2" class="w-full border border-gray-300 rounded-md p-2"></textarea>
+                        </div>
+                    </div>
+                    <div class="flex justify-end">
+                        <button @click="addApplication" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium">Tambah Senarai</button>
+                    </div>
+                </div>
+
+                <!-- List of added items -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kategori</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Premis</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Butiran</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pegawai</th>
+                                <th class="px-4 py-3"></th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            <tr v-for="(app, index) in applications" :key="app.id">
+                                <td class="px-4 py-3 text-sm"><span class="font-semibold">{{ app.kategori }}</span><br><span v-if="app.kategori !== 'Hal-hal Lain'" class="text-gray-500">{{ app.borang }}</span></td>
+                                <td class="px-4 py-3 text-sm font-medium">{{ app.nama }}</td>
+                                <td class="px-4 py-3 text-sm text-gray-600 truncate max-w-xs">{{ app.butiran }}</td>
+                                <td class="px-4 py-3 text-sm">{{ app.pegawai }}</td>
+                                <td class="px-4 py-3 text-right text-sm">
+                                    <button @click="applications.splice(index, 1)" class="text-red-600 hover:text-red-900">Buang</button>
+                                </td>
+                            </tr>
+                            <tr v-if="applications.length === 0">
+                                <td colspan="5" class="px-4 py-8 text-center text-gray-500">Tiada permohonan direkodkan.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB 2: AGENDA (DOC 1) -->
+            <div v-show="activeTab === 'agenda'" class="max-w-4xl mx-auto">
+                <div class="flex justify-end mb-4 no-print space-x-2">
+                    <button @click="exportWord('doc1-content', 'Agenda_Mesyuarat.doc')" class="bg-blue-600 text-white px-4 py-2 rounded shadow flex items-center gap-2">
+                        Eksport ke Word (.docx)
+                    </button>
+                </div>
+                
+                <div id="doc1-content" class="doc-view font-serif">
+                    <div v-for="kategori in ['Berbangkit', 'Baru', 'Hal-hal Lain']" :key="kategori">
+                        <template v-if="hasItemsKategori(kategori)">
+                            <!-- Kategori Header -->
+                            <h3 class="font-bold text-md uppercase mt-6 mb-2" v-if="kategori === 'Berbangkit'">PERKARA-PERKARA BERBANGKIT</h3>
+                            <h3 class="font-bold text-md uppercase mt-6 mb-2" v-if="kategori === 'Baru'">PEMBENTANGAN PERMOHONAN BARU</h3>
+                            <h3 class="font-bold text-md uppercase mt-6 mb-2" v-if="kategori === 'Hal-hal Lain'">HAL-HAL LAIN</h3>
+
+                            <!-- Borang 1 -->
+                            <div v-if="kategori !== 'Hal-hal Lain' && getFilteredApps(kategori, 'Borang 1').length > 0">
+                                <p class="font-bold text-sm uppercase mb-2">PERMOHONAN KELULUSAN UNTUK MENUBUHKAN ATAU MENYENGGARAKAN (BORANG 1)</p>
+                                <table class="doc-table">
+                                    <thead>
+                                        <tr>
+                                            <th width="5%">Bil.</th>
+                                            <th width="15%">Tarikh Terima Permohonan</th>
+                                            <th width="25%">Nama Premis</th>
+                                            <th width="40%">Butiran Peluasan atau Pengubahan</th>
+                                            <th width="15%">Pegawai Proses</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="(item, idx) in getFilteredApps(kategori, 'Borang 1')" :key="item.id">
+                                            <td>{{ idx + 1 }}</td>
+                                            <td>{{ item.tarikhTerima }}</td>
+                                            <td>{{ item.nama }}</td>
+                                            <td>{{ item.butiran }}</td>
+                                            <td>{{ item.pegawai }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Borang 5 -->
+                            <div v-if="kategori !== 'Hal-hal Lain' && getFilteredApps(kategori, 'Borang 5').length > 0">
+                                <p class="font-bold text-sm uppercase mb-2">PERMOHONAN BAGI PELUASAN ATAU PENGUBAHAN (BORANG 5)</p>
+                                <table class="doc-table">
+                                    <thead>
+                                        <tr>
+                                            <th width="5%">Bil.</th>
+                                            <th width="15%">Tarikh Terima Permohonan/Maklum Balas</th>
+                                            <th width="25%">Nama Premis</th>
+                                            <th width="40%">Butiran Peluasan atau Pengubahan</th>
+                                            <th width="15%">Pegawai Proses</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="(item, idx) in getFilteredApps(kategori, 'Borang 5')" :key="item.id">
+                                            <td>{{ idx + 1 }}</td>
+                                            <td>{{ item.tarikhTerima }}</td>
+                                            <td>{{ item.nama }}</td>
+                                            <td>{{ item.butiran }}</td>
+                                            <td>{{ item.pegawai }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Hal-hal Lain -->
+                            <div v-if="kategori === 'Hal-hal Lain'">
+                                <table class="doc-table">
+                                    <thead>
+                                        <tr>
+                                            <th width="5%">Bil.</th>
+                                            <th width="15%">Tarikh Terima Permohonan</th>
+                                            <th width="25%">Nama Premis</th>
+                                            <th width="40%">Butiran Peluasan atau Pengubahan</th>
+                                            <th width="15%">Pegawai Proses</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="(item, idx) in getFilteredApps(kategori, null)" :key="item.id">
+                                            <td>{{ idx + 1 }}</td>
+                                            <td>{{ item.tarikhTerima }}</td>
+                                            <td>{{ item.nama }}</td>
+                                            <td>{{ item.butiran }}</td>
+                                            <td>{{ item.pegawai }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: SEMASA MESYUARAT -->
+            <div v-show="activeTab === 'mesyuarat'" class="max-w-5xl mx-auto space-y-6">
+                <div v-for="(app, index) in applications" :key="app.id" class="bg-white p-5 rounded-lg border-l-4 shadow-sm" :class="app.keputusan === 'Lulus' ? 'border-green-500' : (app.keputusan === 'Tangguh' ? 'border-red-500' : (app.keputusan === 'KIV' ? 'border-yellow-500' : 'border-blue-500'))">
+                    <div class="flex justify-between items-start mb-4 border-b pb-2">
+                        <div>
+                            <h3 class="font-bold text-lg text-gray-800">{{ app.nama }}</h3>
+                            <p class="text-sm text-gray-500">{{ app.kategori }} <span v-if="app.borang">- {{ app.borang }}</span> | Pegawai: {{ app.pegawai }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Status Updates -->
+                        <div class="space-y-3 bg-gray-50 p-4 rounded">
+                            <h4 class="font-semibold text-sm uppercase text-gray-600">Maklumat Dokumen & Teknikal</h4>
+                            <div>
+                                <label class="text-xs text-gray-500">Status M&E (BPKj)</label>
+                                <select v-model="app.statusBPKj" class="w-full border-gray-300 rounded p-1 text-sm bg-white mt-1 border">
+                                    <option value="Telah mematuhi">Telah mematuhi</option>
+                                    <option value="Tidak mematuhi">Tidak mematuhi</option>
+                                    <option value="Dimajukan untuk semakan">Dimajukan untuk semakan</option>
+                                    <option value="Tidak dikemukakan kerana tidak berkaitan">Tidak dikemukakan kerana tidak berkaitan</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-500">Dokumen Sokongan</label>
+                                <select v-model="app.statusDokumen" class="w-full border-gray-300 rounded p-1 text-sm bg-white mt-1 border">
+                                    <option value="Lengkap">Lengkap</option>
+                                    <option value="Tidak Lengkap">Tidak Lengkap</option>
+                                </select>
+                            </div>
+                            <div class="flex gap-2">
+                                <div class="w-1/2">
+                                    <label class="text-xs text-gray-500">Tenaga Kerja</label>
+                                    <select v-model="app.statusTenaga" class="w-full border-gray-300 rounded p-1 text-sm bg-white mt-1 border">
+                                        <option value="Mematuhi">Mematuhi</option>
+                                        <option value="Tidak Mematuhi">Tidak Mematuhi</option>
+                                    </select>
+                                </div>
+                                <div class="w-1/2">
+                                    <label class="text-xs text-gray-500">Pelan Lantai Arkitek</label>
+                                    <select v-model="app.statusLantai" class="w-full border-gray-300 rounded p-1 text-sm bg-white mt-1 border">
+                                        <option value="Mematuhi">Mematuhi</option>
+                                        <option value="Ketidakpatuhan (Rujuk Lampiran A)">Ada Ketidakpatuhan (Lampiran A)</option>
+                                        <option value="Ketidakpatuhan Minor">Ketidakpatuhan Minor</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Decision -->
+                        <div class="space-y-3 bg-blue-50 p-4 rounded">
+                            <h4 class="font-semibold text-sm uppercase text-gray-600">Keputusan Mesyuarat</h4>
+                            <div>
+                                <label class="text-xs text-gray-500">Keputusan</label>
+                                <select v-model="app.keputusan" class="w-full border-blue-300 rounded p-2 text-sm bg-white mt-1 border font-bold">
+                                    <option value="">-- Pilih Keputusan --</option>
+                                    <option value="Lulus">Comply (Dimajukan ke Mesyuarat JKP)</option>
+                                    <option value="Tangguh">Not Comply (Ditangguhkan / Surat Saranan)</option>
+                                    <option value="KIV Premis">KIV m/b premis (Tunggu Maklum Balas Mematuhi)</option>
+                                    <option value="KIV BPKj">KIV BPKj (Tunggu Ulasan Kejuruteraan Mematuhi)</option>
+                                    <option value="Lain">Tiada Halangan / Lain-lain (Custom)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-500">Teks Keputusan (Boleh diubah jika perlu)</label>
+                                <textarea v-model="app.keputusanTeks" rows="3" class="w-full border-blue-300 rounded p-2 text-sm bg-white mt-1 border" placeholder="Ayat keputusan akan dijana secara automatik berdasarkan pilihan di atas, atau taip keputusan khas di sini..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div v-if="applications.length === 0" class="text-center py-10 bg-white rounded shadow text-gray-500">
+                    Sila daftar permohonan terlebih dahulu di Tab 1.
+                </div>
+            </div>
+
+            <!-- TAB 4: MINIT (DOC 2) -->
+            <div v-show="activeTab === 'minit'" class="max-w-4xl mx-auto">
+                <div class="flex justify-end mb-4 no-print space-x-2">
+                    <button @click="printPage" class="bg-gray-600 text-white px-4 py-2 rounded shadow flex items-center gap-2">
+                        Cetak PDF
+                    </button>
+                    <button @click="exportWord('doc2-content', 'Minit_Mesyuarat.doc')" class="bg-blue-600 text-white px-4 py-2 rounded shadow flex items-center gap-2">
+                        Eksport ke Word (.docx)
+                    </button>
+                </div>
+                
+                <div id="doc2-content" class="doc-view font-serif text-justify leading-relaxed">
+                    
+                    <!-- Header -->
+                    <div class="text-center font-bold mb-8">
+                        <div class="uppercase text-lg">MINIT MESYUARAT<br>JAWATANKUASA KECIL PERAKUAN (JKKP) HOSPITAL SWASTA <span v-if="butiran.bil">BIL. {{ butiran.bil }}</span></div>
+                        <div class="mt-4 text-left font-normal flex justify-center">
+                            <table class="border-none w-3/4">
+                                <tr><td width="20%" class="font-bold border-none p-1">Tarikh:</td><td class="border-none p-1">{{ butiran.tarikh }}</td></tr>
+                                <tr><td class="font-bold border-none p-1">Masa:</td><td class="border-none p-1">{{ butiran.masa }}</td></tr>
+                                <tr><td class="font-bold border-none p-1 align-top">Tempat:</td><td class="border-none p-1 whitespace-pre-wrap">{{ butiran.tempat }}</td></tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Kehadiran -->
+                    <div class="mb-6 space-y-4">
+                        <div v-if="senaraiHadir.length > 0">
+                            <p class="font-bold">HADIR:</p>
+                            <p v-for="pegawai in senaraiHadir" :key="pegawai.nama" class="mb-0">{{ pegawai.nama }}</p>
+                        </div>
+                        
+                        <div v-if="senaraiTidakHadir.length > 0">
+                            <p class="font-bold">TIDAK HADIR DENGAN MAAF:</p>
+                            <p v-for="pegawai in senaraiTidakHadir" :key="pegawai.nama" class="mb-0">{{ pegawai.nama }}</p>
+                        </div>
+
+                        <div v-if="senaraiUrusetia.length > 0">
+                            <p class="font-bold">URUSETIA:</p>
+                            <p v-for="pegawai in senaraiUrusetia" :key="pegawai.nama" class="mb-0">{{ pegawai.nama }}</p>
+                        </div>
+                    </div>
+
+                    <div class="mb-6 contenteditable-field" contenteditable="true">
+                        <p class="font-bold uppercase underline">UCAPAN ALU-ALUAN PENGERUSI</p>
+                        <p>Pengerusi mengalu-alukan kehadiran ahli mesyuarat dengan mengucapkan selamat pagi kepada semua yang hadir.</p>
+                    </div>
+
+                    <!-- Main Minutes Generation -->
+                    <div class="space-y-6">
+                        <div v-for="(section, sIdx) in minitSections" :key="sIdx">
+                            <!-- Section Title -->
+                            <p class="font-bold uppercase underline mt-6 mb-2">{{ section.title }}</p>
+                            
+                            <!-- Subsections (Borang 1, Borang 5) -->
+                            <div v-for="(sub, subTitle) in section.items" :key="subTitle">
+                                <p class="font-bold uppercase mt-4 mb-2" v-if="subTitle !== 'null'">{{ subTitle }}</p>
+                                <p class="mb-2">Sebanyak {{ sub.length }} permohonan telah dibentangkan. Perkara-perkara yang dibincangkan dan diputuskan oleh Jawatankuasa adalah seperti berikut:</p>
+                                
+                                <table class="doc-table mt-2">
+                                    <tbody class="divide-y divide-gray-300">
+                                        <tr v-for="(app, aIdx) in sub" :key="app.id">
+                                            <td width="8%" class="font-bold border p-2">{{ section.index }}.{{ aIdx + 1 }}</td>
+                                            <td class="border p-2">
+                                                <p class="font-bold">{{ app.nama }}</p>
+                                                <p class="mb-2" v-if="app.noFail">({{ app.noFail }})</p>
+                                                
+                                                <p class="underline font-semibold mt-2">Mesyuarat dimaklumkan:</p>
+                                                <ul class="list-disc pl-5 mb-3 space-y-1">
+                                                    <li>Terima {{ app.kategori === 'Berbangkit' ? 'maklum balas' : 'permohonan' }} daripada pihak premis pada {{ app.tarikhTerima }}.</li>
+                                                    <li>Pelan lantai yang dikemukakan mengikut skala 1:100.</li>
+                                                    <li>Pelan mekanikal & elektrikal (M&E) {{ app.statusBPKj.toLowerCase() }}.</li>
+                                                    <li>Dokumen sokongan {{ app.statusDokumen.toLowerCase() }}.</li>
+                                                    <li>Cadangan tenaga kerja {{ app.statusTenaga.toLowerCase() }}.</li>
+                                                    <li>
+                                                        <span v-if="app.statusLantai === 'Mematuhi'">Pelan lantai arkitek mematuhi.</span>
+                                                        <span v-if="app.statusLantai === 'Ketidakpatuhan Minor'">Terdapat ketidakpatuhan minor yang memerlukan maklum balas daripada pihak premis.</span>
+                                                        <span v-if="app.statusLantai === 'Ketidakpatuhan (Rujuk Lampiran A)'">Ketidakpatuhan pada pelan lantai arkitek boleh dirujuk pada Lampiran A surat berkaitan.</span>
+                                                    </li>
+                                                </ul>
+                                                
+                                                <p class="font-bold mt-3">{{ app.keputusanTeks || 'Mesyuarat belum membuat keputusan.' }}</p>
+                                                
+                                                <p class="mt-3 font-semibold text-right">Tindakan: {{ app.pegawai }}</p>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Penutup -->
+                    <div class="mt-8 pt-8 contenteditable-field" contenteditable="true">
+                        <p class="font-bold uppercase underline">PENUTUP</p>
+                        <p>Mesyuarat ditangguhkan pada pukul 3.30 petang dan tarikh mesyuarat seterusnya akan dimaklumkan kelak.</p>
+                    </div>
+
+                    <!-- Tandatangan -->
+                    <div class="mt-16 grid grid-cols-2 gap-10 no-print-break text-center">
+                        <div>
+                            <p class="mb-16 text-left">Disediakan oleh:</p>
+                            <p class="border-t border-black pt-2 uppercase font-bold text-left" :class="!butiran.pencatat ? 'text-gray-400' : ''">{{ butiran.pencatat ? '(' + butiran.pencatat.toUpperCase() + ')' : '(NAMA PENCATAT)' }}</p>
+                            <p class="text-left">Urusetia Mesyuarat</p>
+                        </div>
+                        <div>
+                            <p class="mb-16 text-left">Disahkan oleh:</p>
+                            <p class="border-t border-black pt-2 uppercase font-bold text-left" :class="!butiran.pengerusi ? 'text-gray-400' : ''">{{ butiran.pengerusi ? '(' + butiran.pengerusi.toUpperCase() + ')' : '(NAMA PENGERUSI)' }}</p>
+                            <p class="text-left">Pengerusi Mesyuarat</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Login Modal (Role-Based Access) -->
+            <div v-if="showLoginModal" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-75 no-print">
+                <div class="bg-white p-8 rounded-lg shadow-xl max-w-md w-full m-4">
+                    <h2 class="text-2xl font-bold mb-2 text-gray-800">Log Masuk Sistem</h2>
+                    <p class="text-sm text-gray-600 mb-6">Sila pilih nama anda untuk menentukan tahap akses bagi mesyuarat ini.</p>
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Pilih Nama Pengguna:</label>
+                        <select v-model="currentUser" class="w-full border border-gray-300 rounded-md p-3 text-base outline-none focus:border-blue-500">
+                            <option :value="null" disabled>-- Sila Pilih --</option>
+                            <option v-for="(pegawai, idx) in senaraiPegawai" :key="'login-'+idx" :value="pegawai">
+                                {{ pegawai.nama }} ({{ pegawai.shortName }})
+                            </option>
+                        </select>
+                    </div>
+                    <button @click="login" :disabled="!currentUser" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded transition-colors disabled:bg-gray-400">
+                        Masuk
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Setup Firebase Configurations from Environment
+        const appId = 'mesyuarat-jkkp-app';
+	const firebaseConfig = {
+  	  apiKey: "YOUR_API_KEY",
+  	  authDomain: "your-project-id.firebaseapp.com",
+  	  projectId: "your-project-id",
+  	  storageBucket: "your-project-id.appspot.com",
+  	  messagingSenderId: "123456789",
+  	  appId: "1:123456789:web:abcdef"
+};
+        
+        let db, auth;
+        if (Object.keys(firebaseConfig).length > 0) {
+            const firebaseApp = initializeApp(firebaseConfig);
+            db = getFirestore(firebaseApp);
+            auth = getAuth(firebaseApp);
+        }
+
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    showLoginModal: true,
+                    currentUser: null,
+                    userRole: 'urusetia',
+                    activeTab: 'butiran',
+                    meetingId: '',
+                    shareLink: '',
+                    copied: false,
+                    isRemoteUpdate: false,
+                    saveTimeout: null,
+                    butiran: {
+                        bil: '',
+                        tarikh: '',
+                        masa: '',
+                        tempat: 'Bilik Mesyuarat 3 CKAPS\nAras 6, Blok E1, Kompleks E\nCawangan Kawalan Amalan Perubatan Swasta\nBahagian Amalan Perubatan\nKementerian Kesihatan Malaysia',
+                        pengerusi: '',
+                        pencatat: ''
+                    },
+                    senaraiPegawai: [
+                        { nama: 'Dr. Alicia Liew Hsiao Hui', shortName: 'Dr. Alicia', status: 'Hadir' },
+                        { nama: 'Dr. Nurul ‘Ain binti Selamat @ Keliwon', shortName: 'Dr. Nurul ‘Ain', status: 'Hadir' },
+                        { nama: 'Dr. Mohd Zulfahmi bin Amali', shortName: 'Dr. Zulfahmi', status: 'Hadir' },
+                        { nama: 'Dr. Nurzaimah binti Amir Abdullah', shortName: 'Dr. Nurzaimah', status: 'Hadir' },
+                        { nama: 'Dr. Azrin bin Samsudin', shortName: 'Dr. Azrin', status: 'Hadir' },
+                        { nama: 'Dr. Adibah Hanim binti Mohd. Zulkefli', shortName: 'Dr. Adibah', status: 'Hadir' },
+                        { nama: 'Dr. Nurazwani binti Robaai', shortName: 'Dr. Nurazwani', status: 'Urusetia' },
+                        { nama: 'Dr. Quah Yen Yee', shortName: 'Dr. Quah', status: 'Hadir' },
+                        { nama: 'Dr. Goh Vern Zhi Denise ', shortName: 'Dr. Denise', status: 'Hadir' },
+                        { nama: 'Dr. Syazwini binti Ahmad@Ahmad Sowi', shortName: 'Dr. Syazwini', status: 'Hadir' }, 
+                        { nama: 'Dr. Nur Liyana binti Hanapi', shortName: 'Dr. Liyana', status: 'Hadir' },
+                        { nama: 'Dr. Hapizi bin Mohd Yunus', shortName: 'Dr. Hapizi', status: 'Hadir' },
+                        { nama: 'Dr. Muhamad Aliff Adha bin Ali', shortName: 'Dr. Aliff', status: 'Urusetia' },            
+                        { nama: 'Dr. Nurain binti Zainuddin', shortName: 'Dr. Nurain', status: 'Hadir' },              
+                    ],
+                    pegawaiBaru: '',
+                    form: {
+                        kategori: 'Berbangkit',
+                        borang: 'Borang 5',
+                        tarikhTerima: '',
+                        nama: '',
+                        noFail: '',
+                        butiran: '',
+                        pegawai: ''
+                    },
+                    applications: []
+                }
+            },
+            computed: {
+                minitSections() {
+                    const sections = [];
+                    let secIndex = 1;
+
+                    // Helper to group by Kategori & Borang
+                    const extractSection = (kategoriName, title) => {
+                        const appsInKategori = this.applications.filter(a => a.kategori === kategoriName);
+                        if (appsInKategori.length > 0) {
+                            const items = {};
+                            // Group by Borang
+                            appsInKategori.forEach(app => {
+                                const b = app.borang || 'null';
+                                if (!items[b]) items[b] = [];
+                                items[b].push(app);
+                            });
+                            sections.push({
+                                index: secIndex++,
+                                title: title,
+                                items: items
+                            });
+                        }
+                    };
+
+                    extractSection('Berbangkit', '1. PERKARA BERBANGKIT');
+                    extractSection('Baru', '2. PEMBENTANGAN PERMOHONAN BARU');
+                    extractSection('Hal-hal Lain', '3. HAL-HAL LAIN');
+
+                    return sections;
+                },
+                senaraiHadir() {
+                    return this.senaraiPegawai.filter(p => p.status === 'Hadir');
+                },
+                senaraiTidakHadir() {
+                    return this.senaraiPegawai.filter(p => p.status === 'Tidak Hadir');
+                },
+                senaraiUrusetia() {
+                    return this.senaraiPegawai.filter(p => p.status === 'Urusetia');
+                }
+            },
+            watch: {
+                // Auto-generate Keputusan text based on dropdown change
+                applications: {
+                    deep: true,
+                    handler(newVal) {
+                        newVal.forEach(app => {
+                            if (!app.manualKeputusanEdit) {
+                                if (app.keputusan === 'Lulus') {
+                                    app.keputusanTeks = "Mesyuarat bersetuju permohonan boleh dimajukan ke Mesyuarat Jawatankuasa Penilaian (JKP) yang akan datang untuk dipertimbangkan.";
+                                } else if (app.keputusan === 'Tangguh') {
+                                    app.keputusanTeks = "Mesyuarat bersetuju permohonan ditangguhkan dan surat saranan penambahbaikan perlu dikeluarkan kepada pihak premis.";
+                                } else if (app.keputusan === 'KIV Premis') {
+                                    app.keputusanTeks = "Mesyuarat bersetuju permohonan boleh dimajukan ke Mesyuarat Jawatankuasa Penilaian (JKP) yang akan datang untuk dipertimbangkan setelah menerima maklum balas yang mematuhi daripada pihak premis.";
+                                } else if (app.keputusan === 'KIV BPKj') {
+                                    app.keputusanTeks = "Mesyuarat bersetuju permohonan boleh dimajukan ke Mesyuarat Jawatankuasa Penilaian (JKP) yang akan datang untuk dipertimbangkan setelah menerima ulasan kejuruteraan yang mematuhi daripada pihak BPKj.";
+                                }
+                            }
+                        });
+                        this.triggerSave();
+                    }
+                },
+                butiran: { deep: true, handler() { this.triggerSave(); } },
+                senaraiPegawai: { deep: true, handler() { this.triggerSave(); } }
+            },
+            async mounted() {
+                // Sediakan pangkalan data awan
+                if (!db || !auth) return;
+
+                try {
+                    // Authenticate
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+
+                    // Urus Meeting ID dari URL
+                    const urlParams = new URLSearchParams(window.location.search);
+                    let id = urlParams.get('id');
+                    if (!id) {
+                        id = Date.now().toString(36) + Math.random().toString(36).substr(2, 4);
+                        try {
+                            window.history.pushState({}, '', `?id=${id}`);
+                        } catch (e) {
+                            console.warn("Amaran: Berada dalam mod prebiu, URL tidak dapat ditukar. Meneruskan sambungan pangkalan data dengan ID sementara.", e);
+                        }
+                    }
+                    this.meetingId = id;
+                    
+                    // Bina Pautan Perkongsian
+                    try {
+                        const urlObj = new URL(window.location.href);
+                        urlObj.searchParams.set('id', id);
+                        this.shareLink = urlObj.toString();
+                    } catch (e) {
+                        // Fallback untuk mod prebiu jika pembinaan URL gagal
+                        this.shareLink = window.location.href + (window.location.href.includes('?') ? '&' : '?') + 'id=' + id;
+                    }
+
+                    // Listen ke Firestore (Real-time updates)
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'meetings', this.meetingId);
+                    
+                    onSnapshot(docRef, (snap) => {
+                        if (snap.exists()) {
+                            this.isRemoteUpdate = true;
+                            const data = snap.data();
+                            
+                            if(data.butiran) this.butiran = data.butiran;
+                            if(data.applications) this.applications = data.applications;
+                            if(data.senaraiPegawai) this.senaraiPegawai = data.senaraiPegawai;
+                            
+                            // Re-enable autosave after UI applies the remote update
+                            this.$nextTick(() => {
+                                this.isRemoteUpdate = false;
+                            });
+                        }
+                    }, (error) => {
+                        console.error("Firebase listen error:", error);
+                    });
+                } catch (error) {
+                    console.error("Cloud Setup Error:", error);
+                }
+            },
+            methods: {
+                login() {
+                    if (!this.currentUser) return;
+                    
+                    // Tetapkan tahap akses
+                    if (this.currentUser.status === 'Urusetia') {
+                        this.userRole = 'urusetia';
+                        this.activeTab = 'butiran';
+                    } else {
+                        this.userRole = 'pegawai';
+                        this.activeTab = 'daftar';
+                        
+                        // Auto-fill nama Pegawai Proses dalam borang pendaftaran
+                        this.form.pegawai = this.currentUser.shortName;
+                    }
+                    this.showLoginModal = false;
+                },
+                copyLink() {
+                    const tempInput = document.createElement("input");
+                    tempInput.value = this.shareLink;
+                    document.body.appendChild(tempInput);
+                    tempInput.select();
+                    document.execCommand("copy");
+                    document.body.removeChild(tempInput);
+                    
+                    this.copied = true;
+                    setTimeout(() => this.copied = false, 3000);
+                },
+                triggerSave() {
+                    if (this.isRemoteUpdate || !db || !this.meetingId) return;
+                    
+                    clearTimeout(this.saveTimeout);
+                    this.saveTimeout = setTimeout(() => {
+                        this.saveToCloud();
+                    }, 1000); // Tunggu 1 saat lepas habis menaip baru save (jimat kuota database)
+                },
+                async saveToCloud() {
+                    try {
+                        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'meetings', this.meetingId);
+                        await setDoc(docRef, {
+                            butiran: JSON.parse(JSON.stringify(this.butiran)),
+                            applications: JSON.parse(JSON.stringify(this.applications)),
+                            senaraiPegawai: JSON.parse(JSON.stringify(this.senaraiPegawai))
+                        }, { merge: true });
+                    } catch(e) {
+                        console.error("Error saving data:", e);
+                    }
+                },
+                tambahPegawai() {
+                    if (this.pegawaiBaru.trim() !== '') {
+                        this.senaraiPegawai.push({
+                            nama: this.pegawaiBaru,
+                            shortName: this.pegawaiBaru,
+                            status: 'Hadir'
+                        });
+                        this.pegawaiBaru = '';
+                    }
+                },
+                addApplication() {
+                    if(!this.form.nama) return alert('Sila masukkan Nama Premis.');
+                    
+                    this.applications.push({
+                        id: Date.now(),
+                        ...this.form,
+                        borang: this.form.kategori === 'Hal-hal Lain' ? null : this.form.borang,
+                        // Meeting state defaults
+                        statusBPKj: 'Dimajukan untuk semakan',
+                        statusDokumen: 'Lengkap',
+                        statusTenaga: 'Mematuhi',
+                        statusLantai: 'Mematuhi',
+                        keputusan: '',
+                        keputusanTeks: '',
+                        manualKeputusanEdit: false
+                    });
+
+                    // Reset form slightly
+                    this.form.nama = '';
+                    this.form.butiran = '';
+                    this.form.noFail = '';
+                },
+                hasItemsKategori(kategori) {
+                    return this.applications.some(a => a.kategori === kategori);
+                },
+                getFilteredApps(kategori, borang) {
+                    return this.applications.filter(a => a.kategori === kategori && a.borang === borang);
+                },
+                printPage() {
+                    window.print();
+                },
+                exportWord(elementId, filename = '') {
+                    const el = document.getElementById(elementId);
+                    if(!el) return;
+
+                    // Basic styles to retain layout in Word
+                    const preHtml = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+                    <head><meta charset='utf-8'><title>Export HTML To Doc</title>
+                    <style>
+                        table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
+                        th, td { border: 1px solid black; padding: 5px; vertical-align: top; text-align: left; }
+                        h3 { text-transform: uppercase; }
+                    </style>
+                    </head><body>`;
+                    
+                    const postHtml = "</body></html>";
+                    
+                    // Copy content and remove non-printable buttons if any inside the div
+                    const clone = el.cloneNode(true);
+                    
+                    const html = preHtml + clone.innerHTML + postHtml;
+                    const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
+                    
+                    const url = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(html);
+                    filename = filename ? filename : 'document.doc';
+                    
+                    const downloadLink = document.createElement("a");
+                    document.body.appendChild(downloadLink);
+                    
+                    if(navigator.msSaveOrOpenBlob ){
+                        navigator.msSaveOrOpenBlob(blob, filename);
+                    } else {
+                        downloadLink.href = url;
+                        downloadLink.download = filename;
+                        downloadLink.click();
+                    }
+                    document.body.removeChild(downloadLink);
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

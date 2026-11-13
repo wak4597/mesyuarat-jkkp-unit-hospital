@@ -50,10 +50,10 @@
         <div class="flex-grow p-4 md:p-8">
             
             <!-- Share Link Banner -->
-            <div class="max-w-5xl mx-auto bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex flex-col md:flex-row items-center justify-between no-print gap-4 shadow-sm">
+            <div v-show="activeTab === 'butiran'" class="max-w-5xl mx-auto bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex flex-col md:flex-row items-center justify-between no-print gap-4 shadow-sm">
                 <div>
-                    <h3 class="text-sm font-bold text-blue-800">Kolaborasi Masa Nyata (Live Share)</h3>
-                    <p class="text-xs text-blue-600 mt-1">Kongsi pautan ini kepada Pegawai Proses untuk mengisi permohonan di peranti masing-masing. Data akan disegerakkan secara automatik.</p>
+                    <h3 class="text-sm font-bold text-blue-800">Kongsi Link Ini Untuk Pengisian Permohonan</h3>
+                    <p class="text-xs text-blue-600 mt-1">Pastikan link untuk setiap meeting adalah yang dijana dan dikongsi oleh Urusetia. JANGAN GUNA LINK LAMA!!</p>
                 </div>
                 <div class="flex gap-2 items-center w-full md:w-auto">
                     <input type="text" readonly :value="shareLink" class="bg-white border border-blue-300 text-xs rounded p-2 flex-grow md:w-72 text-gray-600 outline-none focus:border-blue-500" @focus="$event.target.select()">
@@ -540,6 +540,7 @@
                     meetingId: '',
                     shareLink: '',
                     copied: false,
+					isNewMeeting: false,
                     isRemoteUpdate: false,
                     saveTimeout: null,
                     butiran: {
@@ -654,7 +655,8 @@
                     const urlParams = new URLSearchParams(window.location.search);
                     let id = urlParams.get('id');
                     if (!id) {
-                        id = Date.now().toString(36) + Math.random().toString(36).substr(2, 4);
+                        this.isNewMeeting = true;
+						id = Date.now().toString(36) + Math.random().toString(36).substr(2, 4);
                         try {
                             window.history.pushState({}, '', `?id=${id}`);
                         } catch (e) {
@@ -745,22 +747,32 @@
         this.loginError = "Ralat log masuk: " + error.message;
     }
 },
-                login() {
-                    if (!this.currentUser) return;
-                    
-                    // Tetapkan tahap akses
-                    if (this.currentUser.status === 'Urusetia') {
-                        this.userRole = 'urusetia';
-                        this.activeTab = 'butiran';
-                    } else {
-                        this.userRole = 'pegawai';
-                        this.activeTab = 'daftar';
-                        
-                        // Auto-fill nama Pegawai Proses dalam borang pendaftaran
-                        this.form.pegawai = this.currentUser.shortName;
-                    }
-                    this.showLoginModal = false;
-                },
+	login() {
+    	if (!this.currentUser) return;
+    
+    	// Tetapkan tahap akses
+    	if (this.currentUser.status === 'Urusetia') {
+        	this.userRole = 'urusetia';
+        	this.activeTab = 'butiran';
+        	this.showLoginModal = false;
+    	} else {
+        	// SEKAT PEGAWAI JIKA BUKAN DARI LINK KONGSIAN URUSETIA
+        	if (this.isNewMeeting) {
+	            alert("AKSES DITOLAK: Sila klik pautan (link) mesyuarat rasmi yang dikongsi oleh Urusetia.");
+	            this.currentUser = null; 
+	            this.googleAuthenticated = false; // Reset if using Google login
+	            if (typeof signOut !== 'undefined' && auth) signOut(auth); // Force log out
+	            return; // Stop the login process
+        	}
+        
+	        this.userRole = 'pegawai';
+	        this.activeTab = 'daftar';
+        
+        	// Auto-fill nama Pegawai Proses dalam borang pendaftaran
+        	this.form.pegawai = this.currentUser.shortName;
+        	this.showLoginModal = false;
+    }
+},
                 copyLink() {
                     const tempInput = document.createElement("input");
                     tempInput.value = this.shareLink;

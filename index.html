@@ -14,10 +14,10 @@
         .tab-active { border-bottom: 2px solid #2563eb; color: #2563eb; font-weight: 600; }
         
         /* Document Styles for Word Export & Print */
-        .doc-view { background: white; padding: 2rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); max-width: 1000px; margin: 0 auto; }
-        .doc-table { width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; }
-        .doc-table th, .doc-table td { border: 1px solid #000; padding: 8px; vertical-align: top; text-align: left; font-size: 11pt; }
-        .doc-table th { font-weight: bold; }
+		.doc-view { background: white; padding: 2rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); max-width: 1000px; margin: 0 auto; font-family: 'Arial', sans-serif; font-size: 9pt; }
+		.doc-table { width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; }
+		.doc-table th, .doc-table td { border: 1px solid #000; padding: 8px; vertical-align: top; text-align: left; font-size: 9pt; }
+		.doc-table th { font-weight: bold; }
         
         @media print {
             body { background-color: white; }
@@ -212,7 +212,7 @@
                     </button>
                 </div>
                 
-                <div id="doc1-content" class="doc-view font-serif">
+                <div id="doc1-content" class="doc-view">
                     <div v-for="kategori in ['Berbangkit', 'Baru', 'Hal-hal Lain']" :key="kategori">
                         <template v-if="hasItemsKategori(kategori)">
                             <!-- Kategori Header -->
@@ -384,7 +384,7 @@
                     </button>
                 </div>
                 
-                <div id="doc2-content" class="doc-view font-serif text-justify leading-relaxed">
+                <div id="doc2-content" class="doc-view text-justify leading-relaxed">
                     
                     <!-- Header -->
                     <div class="text-center font-bold mb-8">
@@ -722,7 +722,7 @@
 			'aliffadha@moh.gov.my': 'Dr. Aliff',
 			'nurain.zainuddin@moh.gov.my': 'Dr. Nurain',
 			'alicia_lhh@moh.gov.my': 'Dr. Alicia',
-			'wak4597@gmail.com': 'Dr. Hapizi'
+			'wak4597@gmail.com': 'Dr. Nurain'
         };
         
         const matchedShortName = emailUserMap[email];

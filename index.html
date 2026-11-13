@@ -193,7 +193,8 @@
                                 <td class="px-4 py-3 text-sm text-gray-600 truncate max-w-xs">{{ app.butiran }}</td>
                                 <td class="px-4 py-3 text-sm">{{ app.pegawai }}</td>
                                 <td class="px-4 py-3 text-right text-sm">
-                                    <button @click="applications.splice(index, 1)" class="text-red-600 hover:text-red-900">Buang</button>
+                                    <button @click="buangPermohonan(index)" class="text-red-600 hover:text-red-900">Buang</button>
+									<button v-if="userRole === 'urusetia' || app.pegawai === currentUser.shortName" @click="buangPermohonan(index)" class="text-red-600 hover:text-red-900">Buang</button>
                                 </td>
                             </tr>
                             <tr v-if="applications.length === 0">
@@ -503,47 +504,47 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import { getFirestore, doc, setDoc, onSnapshot, runTransaction } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js"; // <--- ADDED runTransaction
 
-        // Setup Firebase Configurations from Environment
-        const appId = 'mesyuarat-jkkp-app';
-	const firebaseConfig = {
-  	  apiKey: "AIzaSyC93JkkRW7cIiE1ROdtkoz-M1VRyLFK0ac",
-	  authDomain: "mesyuarat-jkkp-unit-hospital.firebaseapp.com",
-  	  projectId: "mesyuarat-jkkp-unit-hospital",
- 	  storageBucket: "mesyuarat-jkkp-unit-hospital.firebasestorage.app",
-  	  messagingSenderId: "921770044131",
- 	  appId: "1:921770044131:web:f42dc166b38c89712573d6",
- 	  measurementId: "G-79TPW6NSX8"
+// Setup Firebase Configurations from Environment
+const appId = 'mesyuarat-jkkp-app';
+const firebaseConfig = {
+  apiKey: "AIzaSyC93JkkRW7cIiE1ROdtkoz-M1VRyLFK0ac",
+  authDomain: "mesyuarat-jkkp-unit-hospital.firebaseapp.com",
+  projectId: "mesyuarat-jkkp-unit-hospital",
+  storageBucket: "mesyuarat-jkkp-unit-hospital.firebasestorage.app",
+  messagingSenderId: "921770044131",
+  appId: "1:921770044131:web:f42dc166b38c89712573d6",
+  measurementId: "G-79TPW6NSX8"
 };
-        
-        let db, auth;
-        if (Object.keys(firebaseConfig).length > 0) {
-            const firebaseApp = initializeApp(firebaseConfig);
-            db = getFirestore(firebaseApp);
-            auth = getAuth(firebaseApp);
-        }
 
-        const { createApp } = Vue;
+let db, auth;
+if (Object.keys(firebaseConfig).length > 0) {
+    const firebaseApp = initializeApp(firebaseConfig);
+    db = getFirestore(firebaseApp);
+    auth = getAuth(firebaseApp);
+}
 
-        createApp({
-            data() {
-                return {
-                    showLoginModal: true,
-					googleAuthenticated: false,
-					loggedInEmail: '',
-					loginError: '',
-                    currentUser: null,
-                    userRole: 'urusetia',
-                    activeTab: 'butiran',
-                    meetingId: '',
-                    shareLink: '',
-                    copied: false,
-					isNewMeeting: false,
-                    isRemoteUpdate: false,
-                    saveTimeout: null,
-                    butiran: {
+const { createApp } = Vue;
+
+createApp({
+    data() {
+        return {
+            showLoginModal: true,
+            googleAuthenticated: false,
+            loggedInEmail: '',
+            loginError: '',
+            currentUser: null,
+            userRole: 'urusetia',
+            activeTab: 'butiran',
+            meetingId: '',
+            shareLink: '',
+            copied: false,
+            isNewMeeting: false,
+            isRemoteUpdate: false,
+            saveTimeout: null,
+            butiran: {
                         bil: '',
                         tarikh: '',
                         masa: '',
@@ -577,7 +578,8 @@
                         butiran: '',
                         pegawai: ''
                     },
-                    applications: []
+                    applications: [],
+					deletedAppIds: []
                 }
             },
             computed: {
@@ -748,29 +750,29 @@
     }
 },
 	login() {
-    	if (!this.currentUser) return;
+    if (!this.currentUser) return;
     
-    	// Tetapkan tahap akses
-    	if (this.currentUser.status === 'Urusetia') {
-        	this.userRole = 'urusetia';
-        	this.activeTab = 'butiran';
-        	this.showLoginModal = false;
-    	} else {
-        	// SEKAT PEGAWAI JIKA BUKAN DARI LINK KONGSIAN URUSETIA
-        	if (this.isNewMeeting) {
-	            alert("AKSES DITOLAK: Sila klik pautan (link) mesyuarat rasmi yang dikongsi oleh Urusetia.");
-	            this.currentUser = null; 
-	            this.googleAuthenticated = false; // Reset if using Google login
-	            if (typeof signOut !== 'undefined' && auth) signOut(auth); // Force log out
-	            return; // Stop the login process
-        	}
+    // Tetapkan tahap akses
+    if (this.currentUser.status === 'Urusetia') {
+        this.userRole = 'urusetia';
+        this.activeTab = 'butiran';
+        this.showLoginModal = false;
+    } else {
+        // SEKAT PEGAWAI JIKA BUKAN DARI LINK KONGSIAN URUSETIA
+        if (this.isNewMeeting) { // <--- Corrected logic
+            alert("AKSES DITOLAK: Sila klik pautan (link) mesyuarat rasmi yang dikongsi oleh Urusetia.");
+            this.currentUser = null; 
+            this.googleAuthenticated = false; // Reset if using Google login
+            if (typeof signOut !== 'undefined' && auth) signOut(auth); // Force log out
+            return; // Stop the login process
+        }
         
-	        this.userRole = 'pegawai';
-	        this.activeTab = 'daftar';
+        this.userRole = 'pegawai';
+        this.activeTab = 'daftar';
         
-        	// Auto-fill nama Pegawai Proses dalam borang pendaftaran
-        	this.form.pegawai = this.currentUser.shortName;
-        	this.showLoginModal = false;
+        // Auto-fill nama Pegawai Proses dalam borang pendaftaran
+        this.form.pegawai = this.currentUser.shortName;
+        this.showLoginModal = false;
     }
 },
                 copyLink() {
@@ -793,17 +795,59 @@
                     }, 1000); // Tunggu 1 saat lepas habis menaip baru save (jimat kuota database)
                 },
                 async saveToCloud() {
-                    try {
-                        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'meetings', this.meetingId);
-                        await setDoc(docRef, {
-                            butiran: JSON.parse(JSON.stringify(this.butiran)),
-                            applications: JSON.parse(JSON.stringify(this.applications)),
-                            senaraiPegawai: JSON.parse(JSON.stringify(this.senaraiPegawai))
-                        }, { merge: true });
-                    } catch(e) {
-                        console.error("Error saving data:", e);
+    if (this.isRemoteUpdate || !db || !this.meetingId) return;
+    try {
+        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'meetings', this.meetingId);
+
+        await runTransaction(db, async (transaction) => {
+            const cloudDoc = await transaction.get(docRef);
+
+            if (!cloudDoc.exists()) {
+                // Simpanan kali pertama
+                transaction.set(docRef, {
+                    butiran: JSON.parse(JSON.stringify(this.butiran)),
+                    applications: JSON.parse(JSON.stringify(this.applications)),
+                    senaraiPegawai: JSON.parse(JSON.stringify(this.senaraiPegawai))
+                });
+            } else {
+                const cloudData = cloudDoc.data();
+                const cloudApps = cloudData.applications || [];
+                const localApps = JSON.parse(JSON.stringify(this.applications));
+
+                // Gabungkan senarai cloud dan local secara selamat
+                const mergedMap = new Map();
+
+                // 1. Masukkan data cloud (kecuali yang baru dibuang oleh user ini)
+                cloudApps.forEach(app => {
+                    if (!this.deletedAppIds.includes(app.id)) {
+                        mergedMap.set(app.id, app);
                     }
-                },
+                });
+
+                // 2. Timpa/Tambah data dari skrin user ini
+                localApps.forEach(app => mergedMap.set(app.id, app));
+
+                const finalApps = Array.from(mergedMap.values());
+
+                transaction.update(docRef, {
+                    butiran: JSON.parse(JSON.stringify(this.butiran)),
+                    applications: finalApps,
+                    senaraiPegawai: JSON.parse(JSON.stringify(this.senaraiPegawai))
+                });
+            }
+        });
+        // Kosongkan memori buang selepas berjaya sync
+        this.deletedAppIds = [];
+    } catch(e) {
+        console.error("Ralat menyimpan data (Transaction Error):", e);
+    }
+},
+buangPermohonan(index) {
+    // Rekod ID yang dibuang supaya ia tidak dimasukkan semula oleh cloud
+    this.deletedAppIds.push(this.applications[index].id);
+    this.applications.splice(index, 1);
+    this.triggerSave();
+},
                 tambahPegawai() {
                     if (this.pegawaiBaru.trim() !== '') {
                         this.senaraiPegawai.push({

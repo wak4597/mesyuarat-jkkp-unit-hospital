@@ -32,7 +32,9 @@
         <div class="bg-white shadow-sm border-b border-gray-200 no-print sticky top-0 z-10">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between h-16 items-center">
-                    <h1 class="text-xl font-bold text-gray-900">Mesyuarat JKKP Hospital</h1>
+                    <h1 class="text-xl font-bold text-gray-900">
+    					Mesyuarat JKKP Hospital Swasta <span v-if="butiran.bil">Bil. {{ butiran.bil }}</span>
+					</h1>
                     <div class="flex space-x-1 border-b border-gray-200">
                         <button v-if="userRole === 'urusetia'" @click="activeTab = 'butiran'" :class="['px-4 py-4 text-sm tab-btn hover:bg-gray-50', activeTab === 'butiran' ? 'tab-active' : 'text-gray-500']">1. Butiran Mesyuarat</button>
                         <button @click="activeTab = 'daftar'" :class="['px-4 py-4 text-sm tab-btn hover:bg-gray-50', activeTab === 'daftar' ? 'tab-active' : 'text-gray-500']">2. Permohonan</button>
@@ -489,33 +491,13 @@
 <div v-if="showLoginModal" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-75 no-print">
     <div class="bg-white p-8 rounded-lg shadow-xl max-w-md w-full m-4">
         <h2 class="text-2xl font-bold mb-2 text-gray-800">Log Masuk Sistem</h2>
+        <p class="text-sm text-gray-600 mb-6">Sila sahkan identiti anda menggunakan akaun Google untuk mengakses sistem ini.</p>
         
-        <!-- Step 1: Google Authentication -->
-        <div v-if="!googleAuthenticated">
-            <p class="text-sm text-gray-600 mb-6">Sila sahkan identiti anda menggunakan akaun Google untuk mengakses sistem ini.</p>
-            <button @click="loginWithGoogle" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded transition-colors">
-                Sahkan Identiti (Google)
-            </button>
-            <p v-if="loginError" class="text-red-500 text-xs mt-3 font-bold">{{ loginError }}</p>
-        </div>
-
-        <!-- Step 2: Role Selection -->
-        <div v-else>
-            <p class="text-sm text-green-600 mb-4 font-bold">Identiti disahkan: {{ loggedInEmail }}</p>
-            <p class="text-sm text-gray-600 mb-6">Sila pilih nama anda untuk menentukan tahap akses mesyuarat.</p>
-            <div class="mb-6">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Pilih Nama Pengguna:</label>
-                <select v-model="currentUser" class="w-full border border-gray-300 rounded-md p-3 text-base outline-none focus:border-blue-500">
-                    <option :value="null" disabled>-- Sila Pilih --</option>
-                    <option v-for="(pegawai, idx) in senaraiPegawai" :key="'login-'+idx" :value="pegawai">
-                        {{ pegawai.nama }} ({{ pegawai.shortName }})
-                    </option>
-                </select>
-            </div>
-            <button @click="login" :disabled="!currentUser" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded transition-colors disabled:bg-gray-400">
-                Masuk ke Sistem
-            </button>
-        </div>
+        <button @click="loginWithGoogle" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded transition-colors">
+            Sahkan Identiti (Google)
+        </button>
+        
+        <p v-if="loginError" class="text-red-500 text-xs mt-3 font-bold">{{ loginError }}</p>
     </div>
 </div>
 
@@ -722,31 +704,41 @@
         const result = await signInWithPopup(auth, provider);
         const email = result.user.email;
         
-        // ADD YOUR COLLEAGUES' EMAILS HERE:
-        const allowedEmails = [
-            'hapizi.yunus@moh.gov.my',
-			'drnurulain@moh.gov.my',
-			'mohdzulfahmi@moh.gov.my',
-			'nurzaimah.ab@moh.gov.my',
-			'azrin.samsuddin@moh.gov.my',
-            'adibahanim@moh.gov.my',
-			'nurazwani@moh.gov.my',
-			'quahyy@moh.gov.my',
-			'denisegoh@moh.gov.my',
-			'syazwini@moh.gov.my',
-            'nur.liyana@moh.gov.my',
-			' aliffadha@moh.gov.my',
-			'nurain.zainuddin@moh.gov.my',
-			'alicia_lhh@moh.gov.my',
-			'wak4597@gmail.com'
-        ];
+        // MAP EMAILS TO SHORT NAMES DIRECTLY
+        const emailUserMap = {
+            'hapizi.yunus@moh.gov.my': 'Dr. Hapizi',
+			'drnurulain@moh.gov.my': 'Dr. Nurul ‘Ain',
+			'mohdzulfahmi@moh.gov.my': 'Dr. Zulfahmi',
+			'nurzaimah.ab@moh.gov.my': 'Dr. Nurzaimah',
+			'azrin.samsuddin@moh.gov.my': 'Dr. Azrin',
+            'adibahanim@moh.gov.my': 'Dr. Adibah',
+			'nurazwani@moh.gov.my': 'Dr. Nurazwani',
+			'quahyy@moh.gov.my': 'Dr. Quah', 
+			'denisegoh@moh.gov.my': 'Dr. Denise',
+			'syazwini@moh.gov.my': 'Dr. Syazwini',
+            'nur.liyana@moh.gov.my': 'Dr. Liyana',
+			' aliffadha@moh.gov.my': 'Dr. Aliff',
+			'nurain.zainuddin@moh.gov.my': 'Dr. Nurain',
+			'alicia_lhh@moh.gov.my': 'Dr. Alicia',
+			'wak4597@gmail.com': 'Dr. Hapizi'
+        };
         
-        if (allowedEmails.includes(email)) {
-            this.googleAuthenticated = true;
-            this.loggedInEmail = email;
-            this.loginError = '';
+        const matchedShortName = emailUserMap[email];
+        
+        if (matchedShortName) {
+            // Find the user's full profile in senaraiPegawai
+            const matchedPegawai = this.senaraiPegawai.find(p => p.shortName === matchedShortName);
+            
+            if (matchedPegawai) {
+                this.currentUser = matchedPegawai;
+                this.loginError = '';
+                this.login(); // Auto-login and close the modal instantly
+            } else {
+                this.loginError = "Ralat: Profil anda tidak dijumpai dalam senarai sistem.";
+                await signOut(auth);
+            }
         } else {
-            this.loginError = "Akses ditolak: Emel anda tidak dibenarkan.";
+            this.loginError = "Akses ditolak: Emel " + email + " tidak dibenarkan.";
             await signOut(auth);
         }
     } catch (error) {

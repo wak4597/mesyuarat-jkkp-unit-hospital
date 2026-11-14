@@ -531,6 +531,7 @@ createApp({
     data() {
         return {
             showLoginModal: true,
+			isInitialDataLoad: true,
             googleAuthenticated: false,
             loggedInEmail: '',
             loginError: '',
@@ -684,9 +685,12 @@ createApp({
                             this.isRemoteUpdate = true;
                             const data = snap.data();
                             
-                            if(data.butiran) this.butiran = data.butiran;
-                            if(data.applications) this.applications = data.applications;
-                            if(data.senaraiPegawai) this.senaraiPegawai = data.senaraiPegawai;
+                            if (this.isInitialDataLoad || this.userRole !== 'urusetia') {
+            					if(data.butiran) this.butiran = data.butiran;
+            					if(data.senaraiPegawai) this.senaraiPegawai = data.senaraiPegawai;
+       						}
+							
+                            if(data.applications) this.applications = data.applications;                            
                             
                             // Re-enable autosave after UI applies the remote update
                             this.$nextTick(() => {
@@ -828,11 +832,19 @@ createApp({
 
                 const finalApps = Array.from(mergedMap.values());
 
-                transaction.update(docRef, {
-                    butiran: JSON.parse(JSON.stringify(this.butiran)),
-                    applications: finalApps,
-                    senaraiPegawai: JSON.parse(JSON.stringify(this.senaraiPegawai))
-                });
+				// ASINGKAN DATA YANG INGIN DIKEMASKINI (FIX IS HERE)
+				const updateData = {
+   					applications: finalApps
+				};
+
+				// Hanya urusetia dibenarkan untuk overwrite butiran & senarai pegawai di cloud
+				if (this.userRole === 'urusetia') {
+    				updateData.butiran = JSON.parse(JSON.stringify(this.butiran));
+   					updateData.senaraiPegawai = JSON.parse(JSON.stringify(this.senaraiPegawai));
+				}
+
+				// Hantar update ke Firestore
+				transaction.update(docRef, updateData);
             }
         });
         // Kosongkan memori buang selepas berjaya sync
@@ -859,6 +871,7 @@ buangPermohonan(index) {
                 },
                 addApplication() {
                     if(!this.form.nama) return alert('Sila masukkan Nama Premis.');
+					if(!this.form.noFail) return alert('Sila masukkan No. Fail.');
                     
                     this.applications.push({
                         id: Date.now(),

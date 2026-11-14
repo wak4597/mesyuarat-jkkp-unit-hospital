@@ -656,6 +656,31 @@ createApp({
                     // Urus Meeting ID dari URL
                     const urlParams = new URLSearchParams(window.location.search);
                     let id = urlParams.get('id');
+					
+					if (id === 'terkini') {
+                        try {
+                            const meetingsRef = collection(db, 'artifacts', appId, 'public', 'data', 'meetings');
+                            const snapshot = await getDocs(meetingsRef);
+                            let senaraiId = [];
+                            
+                            snapshot.forEach(doc => senaraiId.push(doc.id));
+                            
+                            if (senaraiId.length > 0) {
+                                // Susun ID menurun (yang paling baru akan berada di atas)
+                                senaraiId.sort((a, b) => b.localeCompare(a)); 
+                                id = senaraiId[0]; // Ambil ID yang paling terkini
+                                
+                                // Tukar URL di browser supaya ID sebenar dipaparkan
+                                window.history.replaceState({}, '', `?id=${id}`);
+                            } else {
+                                id = null; // Jika pangkalan data masih kosong
+                            }
+                        } catch (e) {
+                            console.error("Gagal mencari mesyuarat terkini:", e);
+                            id = null; // Terus buat ID baru jika gagal
+                        }
+                    }
+					
                     if (!id) {
                         this.isNewMeeting = true;
 						id = Date.now().toString(36) + Math.random().toString(36).substr(2, 4);

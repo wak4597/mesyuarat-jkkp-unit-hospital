@@ -459,36 +459,40 @@
                         </div>
                     </div>
 
-                    <!-- Kehadiran (Diubah ke Format Jadual) -->
-                    <table class="no-border" style="width: 100%; margin-bottom: 24px;" v-if="senaraiHadir.length > 0 || senaraiTidakHadir.length > 0 || senaraiUrusetia.length > 0">
-                        <tr v-if="senaraiHadir.length > 0">
-                            <td style="width: 30%; font-weight: bold; padding-bottom: 12px; vertical-align: top;">HADIR:</td>
-                            <td style="width: 70%; padding-bottom: 12px; vertical-align: top;">
+                    <!-- Kehadiran (Format 1 Lajur Menegak) -->
+                    <div style="margin-bottom: 24px; text-align: left;" v-if="senaraiHadir.length > 0 || senaraiTidakHadir.length > 0 || senaraiUrusetia.length > 0">
+                        
+                        <div v-if="senaraiHadir.length > 0" style="margin-bottom: 16px;">
+                            <p style="font-weight: bold; margin-top: 0; margin-bottom: 8px;">HADIR:</p>
+                            <div>
                                 <div v-for="pegawai in senaraiHadir" :key="pegawai.nama" style="margin-bottom: 8px; line-height: 1.2;">
                                     <span style="font-weight: bold; display: block;">{{ pegawai.nama }}</span>
-                                    <span v-if="pegawai.pangkat" style="font-size: 8.5pt; display: block;">- {{ pegawai.pangkat }}</span>
+                                    <span v-if="pegawai.pangkat" style="font-size: 8.5pt; display: block;">{{ pegawai.pangkat }}</span>
                                 </div>
-                            </td>
-                        </tr>
-                        <tr v-if="senaraiTidakHadir.length > 0">
-                            <td style="font-weight: bold; padding-bottom: 12px; vertical-align: top;">TIDAK HADIR DENGAN MAAF:</td>
-                            <td style="padding-bottom: 12px; vertical-align: top;">
+                            </div>
+                        </div>
+
+                        <div v-if="senaraiTidakHadir.length > 0" style="margin-bottom: 16px;">
+                            <p style="font-weight: bold; margin-top: 0; margin-bottom: 8px;">TIDAK HADIR DENGAN MAAF:</p>
+                            <div>
                                 <div v-for="pegawai in senaraiTidakHadir" :key="pegawai.nama" style="margin-bottom: 8px; line-height: 1.2;">
                                     <span style="font-weight: bold; display: block;">{{ pegawai.nama }}</span>
                                     <span v-if="pegawai.pangkat" style="font-size: 8.5pt; display: block;">- {{ pegawai.pangkat }}</span>
                                 </div>
-                            </td>
-                        </tr>
-                        <tr v-if="senaraiUrusetia.length > 0">
-                            <td style="font-weight: bold; padding-bottom: 12px; vertical-align: top;">URUSETIA:</td>
-                            <td style="padding-bottom: 12px; vertical-align: top;">
+                            </div>
+                        </div>
+
+                        <div v-if="senaraiUrusetia.length > 0" style="margin-bottom: 16px;">
+                            <p style="font-weight: bold; margin-top: 0; margin-bottom: 8px;">URUSETIA:</p>
+                            <div>
                                 <div v-for="pegawai in senaraiUrusetia" :key="pegawai.nama" style="margin-bottom: 8px; line-height: 1.2;">
                                     <span style="font-weight: bold; display: block;">{{ pegawai.nama }}</span>
                                     <span v-if="pegawai.pangkat" style="font-size: 8.5pt; display: block;">- {{ pegawai.pangkat }}</span>
                                 </div>
-                            </td>
-                        </tr>
-                    </table>
+                            </div>
+                        </div>
+
+                    </div>
 
                     <div class="contenteditable-field" contenteditable="true" style="margin-bottom: 24px;">
                         <p style="font-weight: bold; text-transform: uppercase; text-decoration: underline;">UCAPAN ALU-ALUAN PENGERUSI</p>

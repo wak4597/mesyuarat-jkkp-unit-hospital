@@ -36,11 +36,11 @@
     					Mesyuarat JKKP Hospital Swasta <span v-if="butiran.bil">Bil. {{ butiran.bil }}</span>
 					</h1>
                     <div class="flex space-x-1 border-b border-gray-200">
-                        <button v-if="userRole === 'urusetia'" @click="activeTab = 'butiran'" :class="['px-4 py-4 text-sm tab-btn hover:bg-gray-50', activeTab === 'butiran' ? 'tab-active' : 'text-gray-500']">1. Butiran Mesyuarat</button>
-                        <button @click="activeTab = 'daftar'" :class="['px-4 py-4 text-sm tab-btn hover:bg-gray-50', activeTab === 'daftar' ? 'tab-active' : 'text-gray-500']">2. Permohonan</button>
-                        <button v-if="userRole === 'urusetia'" @click="activeTab = 'agenda'" :class="['px-4 py-4 text-sm tab-btn hover:bg-gray-50', activeTab === 'agenda' ? 'tab-active' : 'text-gray-500']">3. Senarai Premis</button>
-                        <button v-if="userRole === 'urusetia'" @click="activeTab = 'mesyuarat'" :class="['px-4 py-4 text-sm tab-btn hover:bg-gray-50', activeTab === 'mesyuarat' ? 'tab-active' : 'text-gray-500']">4. Keputusan Mesyuarat</button>
-                        <button v-if="userRole === 'urusetia'" @click="activeTab = 'minit'" :class="['px-4 py-4 text-sm tab-btn hover:bg-gray-50', activeTab === 'minit' ? 'tab-active' : 'text-gray-500']">5. Minit Mesyuarat</button>
+                        <button v-if="userRole === 'urusetia'" @click="activeTab = 'butiran'" :class="['px-4 py-4 text-sm tab-btn hover:bg-gray-50', activeTab === 'butiran' ? 'tab-active' : 'text-gray-500']">Butiran Mesyuarat</button>
+                        <button @click="activeTab = 'daftar'" :class="['px-4 py-4 text-sm tab-btn hover:bg-gray-50', activeTab === 'daftar' ? 'tab-active' : 'text-gray-500']">Permohonan</button>
+                        <button v-if="userRole === 'urusetia'" @click="activeTab = 'agenda'" :class="['px-4 py-4 text-sm tab-btn hover:bg-gray-50', activeTab === 'agenda' ? 'tab-active' : 'text-gray-500']">Senarai Premis</button>
+                        <button v-if="userRole === 'urusetia'" @click="activeTab = 'mesyuarat'" :class="['px-4 py-4 text-sm tab-btn hover:bg-gray-50', activeTab === 'mesyuarat' ? 'tab-active' : 'text-gray-500']">Keputusan Mesyuarat</button>
+                        <button v-if="userRole === 'urusetia'" @click="activeTab = 'minit'" :class="['px-4 py-4 text-sm tab-btn hover:bg-gray-50', activeTab === 'minit' ? 'tab-active' : 'text-gray-500']">Minit Mesyuarat</button>
                     </div>
                 </div>
             </div>
@@ -95,9 +95,14 @@
                                 <input v-model="butiran.pengerusi" type="text" class="w-full border border-gray-300 rounded-md p-2" placeholder="Nama Pengerusi">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Pencatat Minit</label>
-                                <input v-model="butiran.pencatat" type="text" class="w-full border border-gray-300 rounded-md p-2" placeholder="Nama Pencatat">
-                            </div>
+    							<label class="block text-sm font-medium text-gray-700 mb-1">Pencatat Minit</label>
+    							<select v-model="butiran.pencatat" class="w-full border border-gray-300 rounded-md p-2 bg-white">
+        							<option value="" disabled>-- Pilih Pencatat --</option>
+       					 			<option v-for="(pegawai, idx) in senaraiPegawai" :key="'pencatat-'+idx" :value="pegawai.nama">
+            							{{ pegawai.nama }}
+        							</option>
+    							</select>
+							</div>
                         </div>
                     </div>
                 </div>
@@ -153,6 +158,7 @@
                             <select v-model="form.borang" class="w-full border border-gray-300 rounded-md p-2">
                                 <option value="Borang 1">Borang 1</option>
                                 <option value="Borang 5">Borang 5</option>
+								<option value="Borang 5">Brownfiled</option>
                             </select>
                         </div>
                         <div>
@@ -164,11 +170,17 @@
                             <input v-model="form.nama" type="text" class="w-full border border-gray-300 rounded-md p-2">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">No. Fail<span class="text-red-500">*</span></label>
-                            <input v-model="form.noFail" type="text" class="w-full border border-gray-300 rounded-md p-2" placeholder="Cth: KKM 87/A2/1-3/...">
-                        </div>
+    						<label class="block text-sm font-medium text-gray-700 mb-1">No. Fail<span class="text-red-500">*</span></label>
+    						<input v-model="form.noFail" type="text" list="fail-list" class="w-full border border-gray-300 rounded-md p-2" placeholder="Cth: KKM 87/A2/1-3/...">
+    						<datalist id="fail-list">
+        						<!-- Asas (Base prefix) -->
+        						<option value="KKM 87/A2/1-"></option>
+       						 	<!-- Nombor fail yang telah dimasukkan sebelum ini -->
+        						<option v-for="fail in senaraiFailUnik" :key="fail" :value="fail"></option>
+    						</datalist>
+						</div>
                         <div class="md:col-span-2 lg:col-span-3">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Butiran Peluasan atau Pengubahan</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Butiran Permohonan</label>
                             <textarea v-model="form.butiran" rows="2" class="w-full border border-gray-300 rounded-md p-2"></textarea>
                         </div>
                     </div>
@@ -457,7 +469,7 @@
                                                     </li>
                                                 </ul>
                                                 
-                                                <p class="font-bold mt-3">{{ app.keputusanTeks || 'Mesyuarat belum membuat keputusan.' }}</p>
+                                                <p class="font-bold mt-3" v-html="formatItalicLive(app.keputusanTeks || 'Mesyuarat belum membuat keputusan.')"></p>
                                                 
                                                 <p class="mt-3 font-semibold text-right">Tindakan: {{ app.pegawai }}</p>
                                             </td>
@@ -547,6 +559,22 @@ createApp({
             shareLink: '',
             copied: false,
             isNewMeeting: false,
+			senaraiItalic: ['Comply', 'Not Comply', 'Minor', 'KIV', 'Custom', 'Pending', 'Update', 'Access', 'Administration', 'Adult', 'Andrology', 'Angiography', 'Assessment', 'Asthma', 'Autoclave', 'Baby', 'Balance', 'Base', 'Basement', 'Bath', 'Bay', 
+    						'Bed', 'Biohazard', 'Biplane', 'Blood', 'Bobath', 'Booth', 'Breastfeeding', 'Bridge', 'Brownfield', 'Business', 'Cabinet', 'Cardiac', 'Cardiologist', 'Care', 'Cashier', 'Catheterization', 'Cathlab', 'Cell', 'Centre', 'Chair', 
+    						'Change', 'Changing', 'Chemical', 'Chemotherapy', 'Clean', 'Clerk', 'Clinic', 'Clinical', 'Closet', 'Cold', 'Collection', 'Computed', 'Conference', 'Consultant', 'Consultation', 'Consumable', 'Continuous', 'Control', 
+    						'Coronary', 'Corridor', 'Counselling', 'Counter', 'Cryostorage', 'Culture', 'Customer', 'Cytogenetic', 'Cytology', 'Cytoscreener', 'Cytotoxic', 'Dark', 'Data', 'Daycare', 'Dayward', 'Delivery', 'Deluxe', 'Dental', 'Department', 
+    						'Diagnostic', 'Dialysis', 'Dietitian', 'Digital', 'Director', 'Dirty', 'Disable', 'Discharge', 'Discussion', 'Doctor', 'Document', 'Dressing', 'Drop', 'Drug', 'East', 'Echo', 'Echocardiography', 'Education', 
+    						'Electrophysiology', 'Embryology', 'Emergency', 'Empty', 'Endoscopy', 'Entrance', 'Entry', 'Equipment', 'Examination', 'Exchange', 'Exercise', 'Existing', 'Expansion', 'Extracorporeal', 'Facade', 'Facility', 'Family', 
+    						'Female', 'Floor', 'Fluoroscopy', 'Food', 'Function', 'Future', 'Garden', 'General', 'Genetic', 'Green', 'Grieving', 'Ground', 'Gym', 'Gymnasium', 'Health', 'Hearing', 'Heart', 'Holding', 'Hot', 'House', 'Hydro', 'Ice', 
+    						'Image', 'Imaging', 'Incubator', 'Injection', 'Inpatient', 'Interview', 'Inventory', 'Isolation', 'Item', 'Janitor', 'Kitchen', 'Lab', 'Laboratory', 'Labour', 'Laser', 'Level', 'Linen', 'Lithotripsy', 'Lobby', 'Locker', 
+    						'Lounge', 'Lung', 'Machine', 'Major', 'Male', 'Mammogram', 'Manager', 'Masturbatorium', 'Maternity', 'Medical', 'Medication', 'Meeting', 'Men', 'Mezzanine', 'Microbiology', 'Microscopy', 'Milk', 'Mobile', 'Moulding', 
+    						'Nappy', 'Negative', 'New', 'Nurse', 'Nursery', 'Nursing', 'Observation', 'Occupational', 'Office', 'Oncall', 'Oncology', 'Open', 'Operation', 'Optometrist', 'Optometry', 'Orthopaedic', 'Osmosis', 'Outpatient', 
+    						'Paediatric', 'Pantry', 'Park', 'Parking', 'Patient', 'Pendant', 'Pharmacy', 'Phlebotomy', 'Phototherapy', 'Physical', 'Physiotherapy', 'Plan', 'Play', 'Pool', 'Porch', 'Positive', 'Prayer', 'Preimplantation', 'Preparation', 
+    						'Pressure', 'Procedure', 'Processing', 'Psychology', 'Public', 'Radiography', 'Radiologist', 'Reception', 'Record', 'Recovery', 'Rehab', 'Rehabilitation', 'Renal', 'Replacement', 'Report', 'Reporting', 'Reprocessor', 'Rest', 
+    						'Resuscitation', 'Reverse', 'Roof', 'Room', 'Rota', 'Scan', 'Scanner', 'Scope', 'Screening', 'Scrub', 'Sensory', 'Service', 'Shock', 'Shower', 'Silent', 'Simulator', 'Single', 'Sister', 'Sleep', 'Specialist', 'Speech', 
+    						'Spirometry', 'Splinting', 'Sputum', 'Staff', 'Station', 'Store', 'Stress', 'Stretcher', 'Suite', 'Supply', 'Support', 'Surgeon', 'Surgical', 'Tea', 'Technical', 'Testing', 'Theatre', 'Therapy', 'Tissue', 'Toilet', 'Tomography', 
+    						'Tower', 'Treatment', 'Triage', 'Trolley', 'Ultrasound', 'Unit', 'Uptake', 'Utility', 'Vacant', 'Vascular', 'Vestibular', 'VIP', 'Visual', 'Waiting', 'Ward', 'Wash', 'Wave', 'Wax', 'Wheelchair', 'Wing', 'Women', 'Work', 
+    						'X-Ray', 'Yellow', 'Zone'],
             isRemoteUpdate: false,
             saveTimeout: null,
             butiran: {
@@ -554,7 +582,7 @@ createApp({
                         tarikh: '',
                         masa: '',
                         tempat: 'Bilik Mesyuarat 3 CKAPS\nAras 6, Blok E1, Kompleks E\nCawangan Kawalan Amalan Perubatan Swasta\nBahagian Amalan Perubatan\nKementerian Kesihatan Malaysia',
-                        pengerusi: '',
+                        pengerusi: 'Dr. Alicia Liew Hsiao Hui',
                         pencatat: ''
                     },
                     senaraiPegawai: [
@@ -588,6 +616,10 @@ createApp({
                 }
             },
             computed: {
+				senaraiFailUnik() {
+        			const semuaFail = this.applications.map(a => a.noFail).filter(Boolean);
+        			return [...new Set(semuaFail)]; // Remove duplicates
+    			},
                 minitSections() {
                     const sections = [];
                     let secIndex = 1;
@@ -711,6 +743,17 @@ createApp({
                 }
             },
             methods: {
+				formatItalicLive(text) {
+    if (!text) return '';
+    let result = text;
+    this.senaraiItalic.forEach(word => {
+        // The (?:e?s)? part looks for an optional 's' or 'es' at the end of the word
+        // The 'gi' flag makes it case-insensitive
+        const regex = new RegExp(`\\b(${word}(?:e?s)?)\\b`, 'gi');
+        result = result.replace(regex, '<i>$1</i>');
+    });
+    return result;
+},
 				async setAsActiveMeeting() {
     if (!db || !this.meetingId) return;
     try {

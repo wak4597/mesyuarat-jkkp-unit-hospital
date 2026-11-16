@@ -56,12 +56,14 @@
                     <p class="text-xs text-blue-600 mt-1">Pastikan link untuk setiap meeting adalah yang dijana dan dikongsi oleh Urusetia. JANGAN GUNA LINK LAMA!!</p>
                 </div>
                 <div class="flex gap-2 items-center w-full md:w-auto">
-                    <input type="text" readonly :value="shareLink" class="bg-white border border-blue-300 text-xs rounded p-2 flex-grow md:w-72 text-gray-600 outline-none focus:border-blue-500" @focus="$event.target.select()">
-                    <button @click="copyLink" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-4 py-2 rounded font-medium transition-colors whitespace-nowrap">
-                        {{ copied ? 'Berjaya Disalin!' : 'Salin Pautan' }}
-                    </button>
-                </div>
-            </div>
+    <input type="text" readonly :value="shareLink" class="bg-white border border-blue-300 text-xs rounded p-2 flex-grow md:w-72 text-gray-600 outline-none focus:border-blue-500" @focus="$event.target.select()">
+    <button @click="copyLink" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-4 py-2 rounded font-medium transition-colors whitespace-nowrap">
+        {{ copied ? 'Berjaya Disalin!' : 'Salin Pautan' }}
+    </button>
+    <button @click="setAsActiveMeeting" class="bg-green-600 hover:bg-green-700 text-white text-xs px-4 py-2 rounded font-medium transition-colors whitespace-nowrap">
+        Paut ke Google Sites
+    </button>
+</div>
 
             <!-- TAB 1: BUTIRAN MESYUARAT -->
             <div v-show="activeTab === 'butiran'" class="max-w-5xl mx-auto">
@@ -504,7 +506,9 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import { getFirestore, doc, setDoc, onSnapshot, runTransaction } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js"; // <--- ADDED runTransaction
+import { getFirestore, doc, setDoc, getDoc, onSnapshot, runTransaction } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js"; 
+// Expose getDoc globally so the login method can reach it
+window.VueFirebaseGetDoc = getDoc;
 
 // Setup Firebase Configurations from Environment
 const appId = 'mesyuarat-jkkp-app';
@@ -656,31 +660,7 @@ createApp({
                     // Urus Meeting ID dari URL
                     const urlParams = new URLSearchParams(window.location.search);
                     let id = urlParams.get('id');
-					
-					if (id === 'terkini') {
-                        try {
-                            const meetingsRef = collection(db, 'artifacts', appId, 'public', 'data', 'meetings');
-                            const snapshot = await getDocs(meetingsRef);
-                            let senaraiId = [];
-                            
-                            snapshot.forEach(doc => senaraiId.push(doc.id));
-                            
-                            if (senaraiId.length > 0) {
-                                // Susun ID menurun (yang paling baru akan berada di atas)
-                                senaraiId.sort((a, b) => b.localeCompare(a)); 
-                                id = senaraiId[0]; // Ambil ID yang paling terkini
-                                
-                                // Tukar URL di browser supaya ID sebenar dipaparkan
-                                window.history.replaceState({}, '', `?id=${id}`);
-                            } else {
-                                id = null; // Jika pangkalan data masih kosong
-                            }
-                        } catch (e) {
-                            console.error("Gagal mencari mesyuarat terkini:", e);
-                            id = null; // Terus buat ID baru jika gagal
-                        }
-                    }
-					
+										
                     if (!id) {
                         this.isNewMeeting = true;
 						id = Date.now().toString(36) + Math.random().toString(36).substr(2, 4);
@@ -730,6 +710,19 @@ createApp({
                 }
             },
             methods: {
+				async setAsActiveMeeting() {
+    if (!db || !this.meetingId) return;
+    try {
+        const activeRef = doc(db, 'artifacts', appId, 'public', 'data', 'active', 'latest');
+        await setDoc(activeRef, { 
+            meetingId: this.meetingId, 
+            tarikhKemasKini: new Date().toISOString() 
+        });
+        alert("Berjaya! Pengguna Google Sites kini akan dihalakan terus ke mesyuarat ini.");
+    } catch(e) {
+        alert("Gagal menetapkan mesyuarat aktif: " + e.message);
+    }
+},
 				async loginWithGoogle() {
     const provider = new GoogleAuthProvider();
     try {
@@ -777,28 +770,53 @@ createApp({
         this.loginError = "Ralat log masuk: " + error.message;
     }
 },
-	login() {
+	async login() {
     if (!this.currentUser) return;
     
+    const urlParams = new URLSearchParams(window.location.search);
+    let currentId = urlParams.get('id');
+
+    // CHECK FOR 'terkini' REDIRECT AFTER LOGIN
+    if (currentId === 'terkini') {
+        try {
+            const activeRef = doc(db, 'artifacts', appId, 'public', 'data', 'active', 'latest');
+            // You must import getDoc at the top of your scripts for this to work
+            const snap = await window.VueFirebaseGetDoc(activeRef); 
+            
+            if (snap.exists() && snap.data().meetingId) {
+                window.location.replace('?id=' + snap.data().meetingId);
+                return; // Stop and let browser redirect
+            } else {
+                alert("Ralat: Tiada mesyuarat aktif ditetapkan oleh Urusetia pada masa ini.");
+                this.googleAuthenticated = false;
+                this.currentUser = null;
+                if (typeof signOut !== 'undefined' && auth) signOut(auth);
+                return;
+            }
+        } catch (e) {
+            console.error("Gagal mendapatkan link terkini", e);
+            alert("Ralat sistem semasa memuat turun pautan terkini.");
+            return;
+        }
+    }
+
     // Tetapkan tahap akses
     if (this.currentUser.status === 'Urusetia') {
         this.userRole = 'urusetia';
         this.activeTab = 'butiran';
         this.showLoginModal = false;
     } else {
-        // SEKAT PEGAWAI JIKA BUKAN DARI LINK KONGSIAN URUSETIA
-        if (this.isNewMeeting) { // <--- Corrected logic
+        // SEKAT PEGAWAI JIKA BUKAN DARI LINK KONGSIAN URUSETIA ATAU TERKINI
+        if (this.isNewMeeting) { 
             alert("AKSES DITOLAK: Sila klik pautan (link) mesyuarat rasmi yang dikongsi oleh Urusetia.");
             this.currentUser = null; 
-            this.googleAuthenticated = false; // Reset if using Google login
-            if (typeof signOut !== 'undefined' && auth) signOut(auth); // Force log out
-            return; // Stop the login process
+            this.googleAuthenticated = false; 
+            if (typeof signOut !== 'undefined' && auth) signOut(auth); 
+            return; 
         }
         
         this.userRole = 'pegawai';
         this.activeTab = 'daftar';
-        
-        // Auto-fill nama Pegawai Proses dalam borang pendaftaran
         this.form.pegawai = this.currentUser.shortName;
         this.showLoginModal = false;
     }

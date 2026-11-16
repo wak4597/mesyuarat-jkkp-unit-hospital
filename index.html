@@ -1025,44 +1025,55 @@ buangPermohonan(index) {
                 printPage() {
                     window.print();
                 },
-                exportWord(elementId, filename = '') {
-                    const el = document.getElementById(elementId);
-                    if(!el) return;
+	exportWord(elementId, filename = '') {
+    	const el = document.getElementById(elementId);
+    	if(!el) return;
 
-                    // Basic styles to retain layout in Word
-                    const preHtml = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-                    <head><meta charset='utf-8'><title>Export HTML To Doc</title>
-                    <style>
-                        table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
-                        th, td { border: 1px solid black; padding: 5px; vertical-align: top; text-align: left; }
-                        h3 { text-transform: uppercase; }
-                    </style>
-                    </head><body>`;
-                    
-                    const postHtml = "</body></html>";
-                    
-                    // Copy content and remove non-printable buttons if any inside the div
-                    const clone = el.cloneNode(true);
-                    
-                    const html = preHtml + clone.innerHTML + postHtml;
-                    const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
-                    
-                    const url = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(html);
-                    filename = filename ? filename : 'document.doc';
-                    
-                    const downloadLink = document.createElement("a");
-                    document.body.appendChild(downloadLink);
-                    
-                    if(navigator.msSaveOrOpenBlob ){
-                        navigator.msSaveOrOpenBlob(blob, filename);
-                    } else {
-                        downloadLink.href = url;
-                        downloadLink.download = filename;
-                        downloadLink.click();
-                    }
-                    document.body.removeChild(downloadLink);
-                }
-            }
+    	// Basic styles to retain layout in Word
+   	 	const preHtml = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+    	<head><meta charset='utf-8'><title>Export HTML To Doc</title>
+    	<style>
+        	table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
+        	th, td { border: 1px solid black; padding: 5px; vertical-align: top; text-align: left; }
+    	</style>
+    	</head><body style="font-family: Arial, sans-serif; font-size: 9pt;">`;
+    
+    	const postHtml = "</body></html>";
+    
+    	// Salin kandungan HTML
+    	const clone = el.cloneNode(true);
+    
+    	// PAKSA INLINE STYLES UNTUK MS WORD (Mencegah Word menukar font)
+    	const allElements = clone.querySelectorAll('*');
+    	allElements.forEach(element => {
+        	element.style.fontFamily = 'Arial, sans-serif';
+        	// Biarkan tajuk H3 sedikit lebih besar (11pt), selebihnya dipaksa menjadi 9pt
+        	if (element.tagName === 'H3') {
+            	element.style.fontSize = '11pt';
+        	} else {
+            	element.style.fontSize = '9pt';
+        	}
+    	});
+    
+    	const html = preHtml + clone.innerHTML + postHtml;
+    	const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
+    
+    	const url = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(html);
+    	filename = filename ? filename : 'document.doc';
+    
+    	const downloadLink = document.createElement("a");
+    	document.body.appendChild(downloadLink);
+    
+    	if(navigator.msSaveOrOpenBlob ){
+        	navigator.msSaveOrOpenBlob(blob, filename);
+    	} else {
+        	downloadLink.href = url;
+        	downloadLink.download = filename;
+        	downloadLink.click();
+    	}
+    	document.body.removeChild(downloadLink);
+	}
+}
         }).mount('#app');
     </script>
 </body>

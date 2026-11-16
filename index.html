@@ -522,12 +522,22 @@
                         <div>
                             <p class="mb-16 text-left">Disediakan oleh:</p>
                             <p class="border-t border-black pt-2 uppercase font-bold text-left" :class="!butiran.pencatat ? 'text-gray-400' : ''">{{ butiran.pencatat ? '(' + butiran.pencatat.toUpperCase() + ')' : '(NAMA PENCATAT)' }}</p>
-                            <p class="text-left">Urusetia Mesyuarat</p>
+                            <p class="text-left leading-tight">
+    							Ketua Penolong Pengarah Kanan UD14<br>
+    							Caw. Kawalan Amalan Perubatan Swasta<br>
+    							Bahagian Amalan Perubatan<br>
+    							Kementerian Kesihatan Malaysia
+							</p>
                         </div>
                         <div>
                             <p class="mb-16 text-left">Disahkan oleh:</p>
                             <p class="border-t border-black pt-2 uppercase font-bold text-left" :class="!butiran.pengerusi ? 'text-gray-400' : ''">{{ butiran.pengerusi ? '(' + butiran.pengerusi.toUpperCase() + ')' : '(NAMA PENGERUSI)' }}</p>
-                            <p class="text-left">Pengerusi Mesyuarat</p>
+                            <p class="text-left leading-tight">
+    							Ketua Penolong Pengarah Kanan UD14<br>
+    							Caw. Kawalan Amalan Perubatan Swasta<br>
+    							Bahagian Amalan Perubatan<br>
+    							Kementerian Kesihatan Malaysia
+							</p>
                         </div>
                     </div>
                 </div>
@@ -595,17 +605,17 @@ createApp({
     						'Change', 'Changing', 'Chemical', 'Chemotherapy', 'Clean', 'Clerk', 'Clinic', 'Clinical', 'Closet', 'Cold', 'Collection', 'Computed', 'Conference', 'Consultant', 'Consultation', 'Consumable', 'Continuous', 'Control', 
     						'Coronary', 'Corridor', 'Counselling', 'Counter', 'Cryostorage', 'Culture', 'Customer', 'Cytogenetic', 'Cytology', 'Cytoscreener', 'Cytotoxic', 'Dark', 'Data', 'Daycare', 'Dayward', 'Delivery', 'Deluxe', 'Dental', 'Department', 
     						'Diagnostic', 'Dialysis', 'Dietitian', 'Digital', 'Director', 'Dirty', 'Disable', 'Discharge', 'Discussion', 'Doctor', 'Document', 'Dressing', 'Drop', 'Drug', 'East', 'Echo', 'Echocardiography', 'Education', 
-    						'Electrophysiology', 'Embryology', 'Emergency', 'Empty', 'Endoscopy', 'Entrance', 'Entry', 'Equipment', 'Examination', 'Exchange', 'Exercise', 'Existing', 'Expansion', 'Extracorporeal', 'Facade', 'Facility', 'Family', 
+    						'Electrophysiology', 'Embryology', 'Emergency', 'Empty', 'Endoscopy', 'Entrance', 'Entry', 'Equipment', 'Examination', 'Exchange', 'Exercise', 'Existing', 'Expansion', 'Extracorporeal', 'Eye', 'Facade', 'Facility', 'Facilities', 'Family', 
     						'Female', 'Floor', 'Fluoroscopy', 'Food', 'Function', 'Future', 'Garden', 'General', 'Genetic', 'Green', 'Grieving', 'Ground', 'Gym', 'Gymnasium', 'Health', 'Hearing', 'Heart', 'Holding', 'Hot', 'House', 'Hydro', 'Ice', 
     						'Image', 'Imaging', 'Incubator', 'Injection', 'Inpatient', 'Interview', 'Inventory', 'Isolation', 'Item', 'Janitor', 'Kitchen', 'Lab', 'Laboratory', 'Labour', 'Laser', 'Level', 'Linen', 'Lithotripsy', 'Lobby', 'Locker', 
-    						'Lounge', 'Lung', 'Machine', 'Major', 'Male', 'Mammogram', 'Manager', 'Masturbatorium', 'Maternity', 'Medical', 'Medication', 'Meeting', 'Men', 'Mezzanine', 'Microbiology', 'Microscopy', 'Milk', 'Mobile', 'Moulding', 
-    						'Nappy', 'Negative', 'New', 'Nurse', 'Nursery', 'Nursing', 'Observation', 'Occupational', 'Office', 'Oncall', 'Oncology', 'Open', 'Operation', 'Optometrist', 'Optometry', 'Orthopaedic', 'Osmosis', 'Outpatient', 
-    						'Paediatric', 'Pantry', 'Park', 'Parking', 'Patient', 'Pendant', 'Pharmacy', 'Phlebotomy', 'Phototherapy', 'Physical', 'Physiotherapy', 'Plan', 'Play', 'Pool', 'Porch', 'Positive', 'Prayer', 'Preimplantation', 'Preparation', 
-    						'Pressure', 'Procedure', 'Processing', 'Psychology', 'Public', 'Radiography', 'Radiologist', 'Reception', 'Record', 'Recovery', 'Rehab', 'Rehabilitation', 'Renal', 'Replacement', 'Report', 'Reporting', 'Reprocessor', 'Rest', 
+    						'Lounge', 'Lung', 'Machine', 'Major', 'Male', 'Mammogram', 'Manager', 'Masturbatorium', 'Maternity', 'Medical', 'Medication', 'Medicine', 'Meeting', 'Men', 'Mezzanine', 'Microbiology', 'Microscopy', 'Milk', 'Mobile', 'Moulding', 
+    						'Nappy', 'Negative', 'New', 'Nuclear', 'Nurse', 'Nursery', 'Nursing', 'Observation', 'Occupational', 'Office', 'Oncall', 'Oncology', 'Open', 'Operation', 'Optometrist', 'Optometry', 'Orthopaedic', 'Osmosis', 'Outpatient', 
+    						'Paediatric', 'Pantry', 'Park', 'Parking', 'Patient', 'Pendant', 'Pharmacy', 'Pharmaceutical', 'Phlebotomy', 'Phototherapy', 'Physical', 'Physiotherapy', 'Plan', 'Play', 'Pool', 'Porch', 'Positive', 'Prayer', 'Preimplantation', 'Preparation', 
+    						'Pressure', 'Procedure', 'Processing', 'Psychology', 'Public', 'Radiography', 'Radiologist', 'Radiotherapy', 'Reception', 'Record', 'Recovery', 'Rehab', 'Rehabilitation', 'Renal', 'Replacement', 'Report', 'Reporting', 'Reprocessor', 'Rest', 
     						'Resuscitation', 'Reverse', 'Roof', 'Room', 'Rota', 'Scan', 'Scanner', 'Scope', 'Screening', 'Scrub', 'Sensory', 'Service', 'Shock', 'Shower', 'Silent', 'Simulator', 'Single', 'Sister', 'Sleep', 'Specialist', 'Speech', 
-    						'Spirometry', 'Splinting', 'Sputum', 'Staff', 'Station', 'Store', 'Stress', 'Stretcher', 'Suite', 'Supply', 'Support', 'Surgeon', 'Surgical', 'Tea', 'Technical', 'Testing', 'Theatre', 'Therapy', 'Tissue', 'Toilet', 'Tomography', 
-    						'Tower', 'Treatment', 'Triage', 'Trolley', 'Ultrasound', 'Unit', 'Uptake', 'Utility', 'Vacant', 'Vascular', 'Vestibular', 'VIP', 'Visual', 'Waiting', 'Ward', 'Wash', 'Wave', 'Wax', 'Wheelchair', 'Wing', 'Women', 'Work', 
-    						'X-Ray', 'Yellow', 'Zone'],
+    						'Spirometry', 'Splinting', 'Sputum', 'Staff', 'Station', 'Store', 'Stress', 'Stretcher', 'Suite', 'Supply', 'Support', 'Surgeon', 'Surgical', 'Tea', 'Technical', 'Test', 'Testing', 'Theatre', 'Therapy', 'Tissue', 'Toilet', 'Tomography', 
+    						'Tower', 'Treatment', 'Triage', 'Trolley', 'Ultrasound', 'Uptake', 'Utility', 'Vacant', 'Vascular', 'Vestibular', 'VIP', 'Visual', 'Waiting', 'Ward', 'Wash', 'Wave', 'Wax', 'Wheelchair', 'Wing', 'Women', 'Work', 
+    						'X-Ray', 'Yellow', 'Zone', 'Post', 'PET/CT', 'Audiology', 'Audiometry', 'Block', 'High', 'Dependency', 'Intensive', 'Lung', 'Function', 'Otorhinolaryngology', 'Ophthalmology'],
             isRemoteUpdate: false,
             saveTimeout: null,
             butiran: {

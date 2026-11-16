@@ -466,7 +466,7 @@
                             <p style="font-weight: bold; margin-top: 0; margin-bottom: 8px;">HADIR:</p>
                             <div>
                                 <div v-for="pegawai in senaraiHadir" :key="pegawai.nama" style="margin-bottom: 8px; line-height: 1.2;">
-                                    <span style="font-weight: bold; display: block;">{{ pegawai.nama }}</span>
+                                    <span style="display: block;">{{ pegawai.nama }}</span>
                                     <span v-if="pegawai.pangkat" style="font-size: 8.5pt; display: block;">{{ pegawai.pangkat }}</span>
                                 </div>
                             </div>
@@ -476,8 +476,8 @@
                             <p style="font-weight: bold; margin-top: 0; margin-bottom: 8px;">TIDAK HADIR DENGAN MAAF:</p>
                             <div>
                                 <div v-for="pegawai in senaraiTidakHadir" :key="pegawai.nama" style="margin-bottom: 8px; line-height: 1.2;">
-                                    <span style="font-weight: bold; display: block;">{{ pegawai.nama }}</span>
-                                    <span v-if="pegawai.pangkat" style="font-size: 8.5pt; display: block;">- {{ pegawai.pangkat }}</span>
+                                    <span style="display: block;">{{ pegawai.nama }}</span>
+                                    <span v-if="pegawai.pangkat" style="font-size: 8.5pt; display: block;">{{ pegawai.pangkat }}</span>
                                 </div>
                             </div>
                         </div>
@@ -486,8 +486,8 @@
                             <p style="font-weight: bold; margin-top: 0; margin-bottom: 8px;">URUSETIA:</p>
                             <div>
                                 <div v-for="pegawai in senaraiUrusetia" :key="pegawai.nama" style="margin-bottom: 8px; line-height: 1.2;">
-                                    <span style="font-weight: bold; display: block;">{{ pegawai.nama }}</span>
-                                    <span v-if="pegawai.pangkat" style="font-size: 8.5pt; display: block;">- {{ pegawai.pangkat }}</span>
+                                    <span style="display: block;">{{ pegawai.nama }}</span>
+                                    <span v-if="pegawai.pangkat" style="font-size: 8.5pt; display: block;">{{ pegawai.pangkat }}</span>
                                 </div>
                             </div>
                         </div>

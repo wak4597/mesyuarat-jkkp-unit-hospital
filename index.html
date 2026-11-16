@@ -49,20 +49,24 @@
         <!-- Main Content -->
         <div class="flex-grow p-4 md:p-8">
             
-            <!-- Share Link Banner -->
-            <div v-show="activeTab === 'butiran'" class="max-w-5xl mx-auto bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex flex-col md:flex-row items-center justify-between no-print gap-4 shadow-sm">
-                <div>
-                    <h3 class="text-sm font-bold text-blue-800">Kongsi Link Ini Untuk Pengisian Permohonan</h3>
-                    <p class="text-xs text-blue-600 mt-1">Pastikan link untuk setiap meeting adalah yang dijana dan dikongsi oleh Urusetia. JANGAN GUNA LINK LAMA!!</p>
-                </div>
-                <div class="flex gap-2 items-center w-full md:w-auto">
-    <input type="text" readonly :value="shareLink" class="bg-white border border-blue-300 text-xs rounded p-2 flex-grow md:w-72 text-gray-600 outline-none focus:border-blue-500" @focus="$event.target.select()">
-    <button @click="copyLink" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-4 py-2 rounded font-medium transition-colors whitespace-nowrap">
-        {{ copied ? 'Berjaya Disalin!' : 'Salin Pautan' }}
-    </button>
-    <button @click="setAsActiveMeeting" class="bg-green-600 hover:bg-green-700 text-white text-xs px-4 py-2 rounded font-medium transition-colors whitespace-nowrap">
-        Paut ke Google Sites
-    </button>
+           <!-- Share Link Banner -->
+<div v-show="activeTab === 'butiran'" class="max-w-5xl mx-auto bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex flex-col md:flex-row items-center justify-between no-print gap-4 shadow-sm">
+    <div>
+        <h3 class="text-sm font-bold text-blue-800">Kongsi Link Ini Untuk Pengisian Permohonan</h3>
+        <p class="text-xs text-blue-600 mt-1">Pastikan link untuk setiap meeting adalah yang dijana dan dikongsi oleh Urusetia. JANGAN GUNA LINK LAMA!!</p>
+    </div>
+    <div class="flex gap-2 items-center w-full md:w-auto overflow-x-auto pb-2 md:pb-0">
+        <input type="text" readonly :value="shareLink" class="bg-white border border-blue-300 text-xs rounded p-2 min-w-[150px] flex-grow md:w-64 text-gray-600 outline-none focus:border-blue-500" @focus="$event.target.select()">
+        <button @click="copyLink" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-4 py-2 rounded font-medium transition-colors whitespace-nowrap">
+            {{ copied ? 'Berjaya Disalin!' : 'Salin Pautan' }}
+        </button>
+        <button @click="setAsActiveMeeting" class="bg-green-600 hover:bg-green-700 text-white text-xs px-4 py-2 rounded font-medium transition-colors whitespace-nowrap">
+            Paut ke Google Sites
+        </button>
+        <button @click="deactivateMeetingLink" class="bg-red-600 hover:bg-red-700 text-white text-xs px-4 py-2 rounded font-medium transition-colors whitespace-nowrap" title="Tutup pautan Google Sites selepas mesyuarat tamat">
+            Nyahaktif Pautan
+        </button>
+    </div>
 </div>
 
             <!-- TAB 1: BUTIRAN MESYUARAT -->

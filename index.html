@@ -113,7 +113,11 @@
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
                         <div v-for="(pegawai, index) in senaraiPegawai" :key="index" class="flex items-center justify-between p-2 hover:bg-gray-50 rounded border border-transparent hover:border-gray-200">
-                            <span class="text-sm font-medium text-gray-800 truncate pr-2 w-3/5">{{ pegawai.nama }}</span>
+                            <div class="flex flex-col w-3/5 pr-2">
+                                <span class="text-sm font-medium text-gray-800 truncate">{{ pegawai.nama }}</span>
+                                <!-- Pangkat dipaparkan sebagai teks kecil, bukan input -->
+                                <span class="text-xs text-gray-500 truncate" v-if="pegawai.pangkat">{{ pegawai.pangkat }}</span>
+                            </div>
                             <select v-model="pegawai.status" class="w-2/5 border border-gray-300 rounded p-1 text-sm bg-white">
                                 <option value="Hadir">Hadir</option>
                                 <option value="Tidak Hadir">Tidak Hadir dengan Maaf</option>
@@ -461,19 +465,28 @@
                         <tr v-if="senaraiHadir.length > 0">
                             <td style="width: 30%; font-weight: bold; padding-bottom: 12px; vertical-align: top;">HADIR:</td>
                             <td style="width: 70%; padding-bottom: 12px; vertical-align: top;">
-                                <div v-for="pegawai in senaraiHadir" :key="pegawai.nama" style="margin-bottom: 2px;">{{ pegawai.nama }}</div>
+                                <div v-for="pegawai in senaraiHadir" :key="pegawai.nama" style="margin-bottom: 8px;">
+                                    <span style="font-weight: bold;">{{ pegawai.nama }}</span>
+                                    <span v-if="pegawai.pangkat"><br><span style="font-size: 8.5pt;">- {{ pegawai.pangkat }}</span></span>
+                                </div>
                             </td>
                         </tr>
                         <tr v-if="senaraiTidakHadir.length > 0">
                             <td style="font-weight: bold; padding-bottom: 12px; vertical-align: top;">TIDAK HADIR DENGAN MAAF:</td>
                             <td style="padding-bottom: 12px; vertical-align: top;">
-                                <div v-for="pegawai in senaraiTidakHadir" :key="pegawai.nama" style="margin-bottom: 2px;">{{ pegawai.nama }}</div>
+                                <div v-for="pegawai in senaraiTidakHadir" :key="pegawai.nama" style="margin-bottom: 8px;">
+                                    <span style="font-weight: bold;">{{ pegawai.nama }}</span>
+                                    <span v-if="pegawai.pangkat"><br><span style="font-size: 8.5pt;">- {{ pegawai.pangkat }}</span></span>
+                                </div>
                             </td>
                         </tr>
                         <tr v-if="senaraiUrusetia.length > 0">
                             <td style="font-weight: bold; padding-bottom: 12px; vertical-align: top;">URUSETIA:</td>
                             <td style="padding-bottom: 12px; vertical-align: top;">
-                                <div v-for="pegawai in senaraiUrusetia" :key="pegawai.nama" style="margin-bottom: 2px;">{{ pegawai.nama }}</div>
+                                <div v-for="pegawai in senaraiUrusetia" :key="pegawai.nama" style="margin-bottom: 8px;">
+                                    <span style="font-weight: bold;">{{ pegawai.nama }}</span>
+                                    <span v-if="pegawai.pangkat"><br><span style="font-size: 8.5pt;">- {{ pegawai.pangkat }}</span></span>
+                                </div>
                             </td>
                         </tr>
                     </table>
@@ -659,20 +672,20 @@ createApp({
                         pencatat: ''
                     },
                     senaraiPegawai: [
-                        { nama: 'Dr. Alicia Liew Hsiao Hui', shortName: 'Dr. Alicia', status: 'Hadir' },
-                        { nama: 'Dr. Nurul ‘Ain binti Selamat @ Keliwon', shortName: 'Dr. Nurul ‘Ain', status: 'Hadir' },
-                        { nama: 'Dr. Mohd Zulfahmi bin Amali', shortName: 'Dr. Zulfahmi', status: 'Hadir' },
-                        { nama: 'Dr. Nurzaimah binti Amir Abdullah', shortName: 'Dr. Nurzaimah', status: 'Hadir' },
-                        { nama: 'Dr. Azrin bin Samsudin', shortName: 'Dr. Azrin', status: 'Urusetia' },
-                        { nama: 'Dr. Adibah Hanim binti Mohd. Zulkefli', shortName: 'Dr. Adibah', status: 'Hadir' },
-                        { nama: 'Dr. Nurazwani binti Robaai', shortName: 'Dr. Nurazwani', status: 'Urusetia' },
-                        { nama: 'Dr. Quah Yen Yee', shortName: 'Dr. Quah', status: 'Hadir' },
-                        { nama: 'Dr. Goh Vern Zhi Denise ', shortName: 'Dr. Denise', status: 'Hadir' },
-                        { nama: 'Dr. Syazwini binti Ahmad@Ahmad Sowi', shortName: 'Dr. Syazwini', status: 'Hadir' }, 
-                        { nama: 'Dr. Nur Liyana binti Hanapi', shortName: 'Dr. Liyana', status: 'Hadir' },
-                        { nama: 'Dr. Hapizi bin Mohd Yunus', shortName: 'Dr. Hapizi', status: 'Urusetia' },
-                        { nama: 'Dr. Muhamad Aliff Adha bin Ali', shortName: 'Dr. Aliff', status: 'Urusetia' },            
-                        { nama: 'Dr. Nurain binti Zainuddin', shortName: 'Dr. Nurain', status: 'Hadir' },              
+                        { nama: 'Dr. Alicia Liew Hsiao Hui', shortName: 'Dr. Alicia', status: 'Hadir', pangkat: 'Ketua Penolong Pengarah Kanan' },
+                        { nama: 'Dr. Nurul ‘Ain binti Selamat @ Keliwon', shortName: 'Dr. Nurul ‘Ain', status: 'Hadir', pangkat: 'Ketua Penolong Pengarah Kanan' },
+                        { nama: 'Dr. Mohd Zulfahmi bin Amali', shortName: 'Dr. Zulfahmi', status: 'Hadir', pangkat: 'Ketua Penolong Pengarah Kanan' },
+                        { nama: 'Dr. Nurzaimah binti Amir Abdullah', shortName: 'Dr. Nurzaimah', status: 'Hadir', pangkat: 'Ketua Penolong Pengarah Kanan' },
+                        { nama: 'Dr. Azrin bin Samsudin', shortName: 'Dr. Azrin', status: 'Hadir', pangkat: 'Ketua Penolong Pengarah Kanan' },
+                        { nama: 'Dr. Adibah Hanim binti Mohd. Zulkefli', shortName: 'Dr. Adibah', status: 'Hadir', pangkat: 'Ketua Penolong Pengarah Kanan' },
+                        { nama: 'Dr. Nurazwani binti Robaai', shortName: 'Dr. Nurazwani', status: 'Urusetia', pangkat: 'Ketua Penolong Pengarah Kanan' },
+                        { nama: 'Dr. Quah Yen Yee', shortName: 'Dr. Quah', status: 'Hadir', pangkat: 'Ketua Penolong Pengarah Kanan' },
+                        { nama: 'Dr. Goh Vern Zhi Denise ', shortName: 'Dr. Denise', status: 'Hadir', pangkat: 'Ketua Penolong Pengarah Kanan' },
+                        { nama: 'Dr. Syazwini binti Ahmad@Ahmad Sowi', shortName: 'Dr. Syazwini', status: 'Hadir', pangkat: 'Ketua Penolong Pengarah Kanan' }, 
+                        { nama: 'Dr. Nur Liyana binti Hanapi', shortName: 'Dr. Liyana', status: 'Hadir', pangkat: 'Ketua Penolong Pengarah' },
+                        { nama: 'Dr. Hapizi bin Mohd Yunus', shortName: 'Dr. Hapizi', status: 'Urusetia', pangkat: 'Ketua Penolong Pengarah' },
+                        { nama: 'Dr. Muhamad Aliff Adha bin Ali', shortName: 'Dr. Aliff', status: 'Urusetia', pangkat: 'Ketua Penolong Pengarah' },            
+                        { nama: 'Dr. Nurain binti Zainuddin', shortName: 'Dr. Nurain', status: 'Hadir',pangkat: 'Penolong Pengarah' },              
                     ],
                     pegawaiBaru: '',
                     form: {

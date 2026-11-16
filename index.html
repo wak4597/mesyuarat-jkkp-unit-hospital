@@ -115,7 +115,6 @@
                         <div v-for="(pegawai, index) in senaraiPegawai" :key="index" class="flex items-center justify-between p-2 hover:bg-gray-50 rounded border border-transparent hover:border-gray-200">
                             <div class="flex flex-col w-3/5 pr-2">
                                 <span class="text-sm font-medium text-gray-800 truncate">{{ pegawai.nama }}</span>
-                                <!-- Pangkat dipaparkan sebagai teks kecil, bukan input -->
                                 <span class="text-xs text-gray-500 truncate" v-if="pegawai.pangkat">{{ pegawai.pangkat }}</span>
                             </div>
                             <select v-model="pegawai.status" class="w-2/5 border border-gray-300 rounded p-1 text-sm bg-white">
@@ -185,4 +184,47 @@
                         </div>
                         <div class="md:col-span-2 lg:col-span-3">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Butiran Permohonan</label>
-                            <textarea v-model="form.butiran" rows="2" class="w-full border border-gray-300
+                            <textarea v-model="form.butiran" rows="2" class="w-full border border-gray-300 rounded-md p-2"></textarea>
+                        </div>
+                    </div>
+                    <div class="flex justify-end">
+                        <button @click="addApplication" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium">Tambah Senarai</button>
+                    </div>
+                </div>
+
+                <!-- List of added items -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kategori</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Premis</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Butiran</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pegawai</th>
+                                <th class="px-4 py-3"></th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            <tr v-for="(app, index) in applications" :key="app.id">
+                                <td class="px-4 py-3 text-sm"><span class="font-semibold">{{ app.kategori }}</span><br><span v-if="app.kategori !== 'Hal-hal Lain'" class="text-gray-500">{{ app.borang }}</span></td>
+                                <td class="px-4 py-3 text-sm font-medium">{{ app.nama }}</td>
+                                <td class="px-4 py-3 text-sm text-gray-600 truncate max-w-xs" v-html="formatItalicLive(app.butiran)"></td>
+                                <td class="px-4 py-3 text-sm">{{ app.pegawai }}</td>
+                                <td class="px-4 py-3 text-right text-sm">
+                                    <button v-if="userRole === 'urusetia' || app.pegawai === currentUser.shortName" @click="buangPermohonan(index)" class="text-red-600 hover:text-red-900">Buang</button>
+                                </td>
+                            </tr>
+                            <tr v-if="applications.length === 0">
+                                <td colspan="5" class="px-4 py-8 text-center text-gray-500">Tiada permohonan direkodkan.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB 2: AGENDA (DOC 1) -->
+            <div v-show="activeTab === 'agenda'" class="max-w-4xl mx-auto">
+                <div class="flex justify-end mb-4 no-print space-x-2">
+                    <button @click="exportWord('doc1-content', 'Senarai_Premis.doc')" class="bg-blue-600 text-white px-4 py-2 rounded shadow flex items-center gap-2">
+                        Eksport ke Word (.docx)
+                    </button

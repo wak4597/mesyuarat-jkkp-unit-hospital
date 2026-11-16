@@ -467,7 +467,10 @@
                             <div>
                                 <div v-for="pegawai in senaraiHadir" :key="pegawai.nama" style="margin-bottom: 8px; line-height: 1.2;">
                                     <span style="display: block;">{{ pegawai.nama }}</span>
-                                    <span v-if="pegawai.pangkat" style="font-size: 8.5pt; display: block;">{{ pegawai.pangkat }}</span>
+                                    <span v-if="pegawai.pangkat">
+                                        <br>
+                                        <span style="font-size: 9pt;">{{ pegawai.pangkat }}</span>
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -477,7 +480,10 @@
                             <div>
                                 <div v-for="pegawai in senaraiTidakHadir" :key="pegawai.nama" style="margin-bottom: 8px; line-height: 1.2;">
                                     <span style="display: block;">{{ pegawai.nama }}</span>
-                                    <span v-if="pegawai.pangkat" style="font-size: 8.5pt; display: block;">{{ pegawai.pangkat }}</span>
+                                    <span v-if="pegawai.pangkat">
+                                        <br>
+                                        <span style="font-size: 9pt;">{{ pegawai.pangkat }}</span>
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -487,7 +493,10 @@
                             <div>
                                 <div v-for="pegawai in senaraiUrusetia" :key="pegawai.nama" style="margin-bottom: 8px; line-height: 1.2;">
                                     <span style="display: block;">{{ pegawai.nama }}</span>
-                                    <span v-if="pegawai.pangkat" style="font-size: 8.5pt; display: block;">{{ pegawai.pangkat }}</span>
+                                    <span v-if="pegawai.pangkat">
+                                        <br>
+                                        <span style="font-size: 9pt;">{{ pegawai.pangkat }}</span>
+                                    </span>
                                 </div>
                             </div>
                         </div>

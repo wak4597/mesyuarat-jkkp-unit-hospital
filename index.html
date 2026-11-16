@@ -158,7 +158,7 @@
                             <select v-model="form.borang" class="w-full border border-gray-300 rounded-md p-2">
                                 <option value="Borang 1">Borang 1</option>
                                 <option value="Borang 5">Borang 5</option>
-								<option value="Borang 5">Brownfiled</option>
+								<option value="Brownfield">Brownfield</option>
                             </select>
                         </div>
                         <div>
@@ -205,7 +205,7 @@
                             <tr v-for="(app, index) in applications" :key="app.id">
                                 <td class="px-4 py-3 text-sm"><span class="font-semibold">{{ app.kategori }}</span><br><span v-if="app.kategori !== 'Hal-hal Lain'" class="text-gray-500">{{ app.borang }}</span></td>
                                 <td class="px-4 py-3 text-sm font-medium">{{ app.nama }}</td>
-                                <td class="px-4 py-3 text-sm text-gray-600 truncate max-w-xs">{{ app.butiran }}</td>
+                                <td class="px-4 py-3 text-sm text-gray-600 truncate max-w-xs" v-html="formatItalicLive(app.butiran)"></td>
                                 <td class="px-4 py-3 text-sm">{{ app.pegawai }}</td>
                                 <td class="px-4 py-3 text-right text-sm">
     								<button v-if="userRole === 'urusetia' || app.pegawai === currentUser.shortName" @click="buangPermohonan(index)" class="text-red-600 hover:text-red-900">Buang</button>
@@ -253,7 +253,7 @@
                                             <td>{{ idx + 1 }}</td>
                                             <td>{{ item.tarikhTerima }}</td>
                                             <td>{{ item.nama }}</td>
-                                            <td>{{ item.butiran }}</td>
+                                            <td v-html="formatItalicLive(item.butiran)"></td>
                                             <td>{{ item.pegawai }}</td>
                                         </tr>
                                     </tbody>
@@ -278,7 +278,32 @@
                                             <td>{{ idx + 1 }}</td>
                                             <td>{{ item.tarikhTerima }}</td>
                                             <td>{{ item.nama }}</td>
-                                            <td>{{ item.butiran }}</td>
+                                            <td v-html="formatItalicLive(item.butiran)"></td>
+                                            <td>{{ item.pegawai }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+							<!-- Brownfield -->
+                            <div v-if="kategori !== 'Hal-hal Lain' && getFilteredApps(kategori, 'Brownfield').length > 0">
+                                <p class="font-bold text-sm uppercase mb-2">PERMOHONAN BAGI CADANGAN HOSPITAL SWASTA (BROWNFIELD)</p>
+                                <table class="doc-table">
+                                    <thead>
+                                        <tr>
+                                            <th width="5%">Bil.</th>
+                                            <th width="15%">Tarikh Terima</th>
+                                            <th width="25%">Nama Premis</th>
+                                            <th width="40%">Butiran Permohonan</th>
+                                            <th width="15%">Pegawai Proses</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="(item, idx) in getFilteredApps(kategori, 'Brownfield')" :key="item.id">
+                                            <td>{{ idx + 1 }}</td>
+                                            <td>{{ item.tarikhTerima }}</td>
+                                            <td>{{ item.nama }}</td>
+                                            <td v-html="formatItalicLive(item.butiran)"></td>
                                             <td>{{ item.pegawai }}</td>
                                         </tr>
                                     </tbody>
@@ -302,7 +327,7 @@
                                             <td>{{ idx + 1 }}</td>
                                             <td>{{ item.tarikhTerima }}</td>
                                             <td>{{ item.nama }}</td>
-                                            <td>{{ item.butiran }}</td>
+                                            <td v-html="formatItalicLive(item.butiran)"></td>
                                             <td>{{ item.pegawai }}</td>
                                         </tr>
                                     </tbody>
@@ -444,7 +469,13 @@
                             
                             <!-- Subsections (Borang 1, Borang 5) -->
                             <div v-for="(sub, subTitle) in section.items" :key="subTitle">
-                                <p class="font-bold uppercase mt-4 mb-2" v-if="subTitle !== 'null'">{{ subTitle }}</p>
+                                <p class="font-bold uppercase mt-4 mb-2" v-if="subTitle !== 'null'">
+    								{{ subTitle === 'Brownfield' ? 'PERMOHONAN BAGI CADANGAN HOSPITAL SWASTA (BROWNFIELD)' : 
+      								  (subTitle === 'Borang 1' ? 'PERMOHONAN KELULUSAN UNTUK MENUBUHKAN ATAU MENYENGGARAKAN (BORANG 1)' : 
+      								  (subTitle === 'Borang 5' ? 'PERMOHONAN BAGI PELUASAN ATAU PENGUBAHAN (BORANG 5)' : subTitle)) 
+    								}}
+								</p>
+								
                                 <p class="mb-2">Sebanyak {{ sub.length }} permohonan telah dibentangkan. Perkara-perkara yang dibincangkan dan diputuskan oleh Jawatankuasa adalah seperti berikut:</p>
                                 
                                 <table class="doc-table mt-2">
@@ -457,7 +488,7 @@
                                                 
                                                 <p class="underline font-semibold mt-2">Mesyuarat dimaklumkan:</p>
                                                 <ul class="list-disc pl-5 mb-3 space-y-1">
-                                                    <li>Terima {{ app.kategori === 'Berbangkit' ? 'maklum balas' : 'permohonan' }} daripada pihak premis pada {{ app.tarikhTerima }}.</li>
+                                                    <li v-html="formatItalicLive(`Terima ${app.kategori === 'Berbangkit' ? 'maklum balas' : 'permohonan'} daripada pihak premis pada ${app.tarikhTerima}.`)"></li>
                                                     <li>Pelan lantai yang dikemukakan mengikut skala 1:100.</li>
                                                     <li>Pelan mekanikal & elektrikal (M&E) {{ app.statusBPKj.toLowerCase() }}.</li>
                                                     <li>Dokumen sokongan {{ app.statusDokumen.toLowerCase() }}.</li>

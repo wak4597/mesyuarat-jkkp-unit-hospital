@@ -568,22 +568,26 @@
                             </td>
                         </tr>
                     </table>
-                </div>
-            </div>
+                </div> <!-- Penutup untuk id="doc2-content" -->
+            </div> <!-- Penutup untuk tab minit -->
+            
+        </div> <!-- PENUTUP BARU 1: Untuk class="flex-grow p-4 md:p-8" -->
 
-            <!-- Login Modal (Role-Based Access) -->
-<div v-if="showLoginModal" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-75 no-print">
-    <div class="bg-white p-8 rounded-lg shadow-xl max-w-md w-full m-4">
-        <h2 class="text-2xl font-bold mb-2 text-gray-800">Log Masuk Sistem</h2>
-        <p class="text-sm text-gray-600 mb-6">Sila sahkan identiti anda menggunakan akaun Google untuk mengakses sistem ini.</p>
-        
-        <button @click="loginWithGoogle" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded transition-colors">
-            Sahkan Identiti (Google)
-        </button>
-        
-        <p v-if="loginError" class="text-red-500 text-xs mt-3 font-bold">{{ loginError }}</p>
-    </div>
-</div>
+        <!-- Login Modal (Role-Based Access) -->
+        <div v-if="showLoginModal" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-75 no-print">
+            <div class="bg-white p-8 rounded-lg shadow-xl max-w-md w-full m-4">
+                <h2 class="text-2xl font-bold mb-2 text-gray-800">Log Masuk Sistem</h2>
+                <p class="text-sm text-gray-600 mb-6">Sila sahkan identiti anda menggunakan akaun Google untuk mengakses sistem ini.</p>
+                
+                <button @click="loginWithGoogle" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded transition-colors">
+                    Sahkan Identiti (Google)
+                </button>
+                
+                <p v-if="loginError" class="text-red-500 text-xs mt-3 font-bold">{{ loginError }}</p>
+            </div>
+        </div>
+
+    </div> <!-- PENUTUP BARU 2: Untuk div id="app" (Sangat Penting!) -->
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";

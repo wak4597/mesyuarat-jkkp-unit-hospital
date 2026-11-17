@@ -1129,55 +1129,51 @@ buangPermohonan(index) {
         const el = document.getElementById(elementId);
         if(!el) return;
 
-        // Basic styles to retain layout in Word
+        // Struktur XML moden untuk OpenXML Word
         const preHtml = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
         <head><meta charset='utf-8'><title>Export HTML To Doc</title>
         <style>
-            /* Hanya table yang ada class .doc-table akan ada garisan border */
             .doc-table { border-collapse: collapse; width: 100%; margin-bottom: 20px; border: 1px solid black; }
             .doc-table th, .doc-table td { border: 1px solid black; padding: 5px; vertical-align: top; text-align: left; }
-            
-            /* Table susun atur tanpa garisan border */
             table.no-border { border-collapse: collapse; width: 100%; border: none !important; }
             table.no-border td, table.no-border th { border: none !important; padding: 5px; vertical-align: top; text-align: left; }
         </style>
         </head><body style="font-family: Arial, sans-serif; font-size: 9pt;">`;
         
         const postHtml = "</body></html>";
-        
-        // Salin kandungan HTML
         const clone = el.cloneNode(true);
         
-        // PAKSA INLINE STYLES UNTUK MS WORD (Mencegah Word menukar font)
         const allElements = clone.querySelectorAll('*');
         allElements.forEach(element => {
             element.style.fontFamily = 'Arial, sans-serif';
-            // Biarkan tajuk div yang ada saiz asal sedikit lebih besar
             if (element.tagName === 'H3') {
                 element.style.fontSize = '11pt';
             } else if (!element.style.fontSize) {
-                // Hanya paksa saiz fon jika elemen tidak mempunyai saiz fon tersendiri (seperti pangkat 8.5pt)
                 element.style.fontSize = '9pt';
             }
         });
         
         const html = preHtml + clone.innerHTML + postHtml;
-        const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
         
-        const url = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(html);
-        filename = filename ? filename : 'document.doc';
+        // 1. TUKAR MIME TYPE KEPADA OPENXML MODEN
+        const blob = new Blob(['\ufeff', html], { 
+            type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' 
+        });
+        
+        filename = filename ? filename.replace('.doc', '.docx') : 'document.docx';
         
         const downloadLink = document.createElement("a");
         document.body.appendChild(downloadLink);
         
-        if(navigator.msSaveOrOpenBlob ){
-            navigator.msSaveOrOpenBlob(blob, filename);
-        } else {
-            downloadLink.href = url;
-            downloadLink.download = filename;
-            downloadLink.click();
-        }
-        document.body.removeChild(downloadLink);
+        const url = URL.createObjectURL(blob);
+        downloadLink.href = url;
+        downloadLink.download = filename;
+        downloadLink.click();
+        
+        setTimeout(() => {
+            document.body.removeChild(downloadLink);
+            URL.revokeObjectURL(url);
+        }, 100);
     }
 }
         }).mount('#app');

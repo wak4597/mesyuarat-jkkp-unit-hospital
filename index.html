@@ -349,7 +349,7 @@
 
             <!-- TAB 3: SEMASA MESYUARAT -->
             <div v-show="activeTab === 'mesyuarat'" class="max-w-5xl mx-auto space-y-6">
-                <div v-for="(app, index) in applications" :key="app.id" class="bg-white p-5 rounded-lg border-l-4 shadow-sm" :class="app.keputusan === 'Lulus' ? 'border-green-500' : (app.keputusan === 'Tangguh' ? 'border-red-500' : (app.keputusan === 'KIV' ? 'border-yellow-500' : 'border-blue-500'))">
+                <div v-for="app in sortedApplications" :key="app.id" class="bg-white p-5 rounded-lg border-l-4 shadow-sm" :class="app.keputusan === 'Lulus' ? 'border-green-500' : (app.keputusan === 'Tangguh' ? 'border-red-500' : (app.keputusan === 'KIV' ? 'border-yellow-500' : 'border-blue-500'))">
                     <div class="flex justify-between items-start mb-4 border-b pb-2">
                         <div>
                             <h3 class="font-bold text-lg text-gray-800">{{ app.nama }}</h3>
@@ -417,7 +417,7 @@
                         </div>
                     </div>
                 </div>
-                <div v-if="applications.length === 0" class="text-center py-10 bg-white rounded shadow text-gray-500">
+                <div v-if="sortedApplications.length === 0" class="text-center py-10 bg-white rounded shadow text-gray-500">
                     Sila daftar permohonan terlebih dahulu di Tab 1.
                 </div>
             </div>
@@ -752,6 +752,19 @@ createApp({
                     extractSection('Hal-hal Lain', '3. HAL-HAL LAIN');
 
                     return sections;
+                },
+
+				sortedApplications() {
+                    const sorted = [];
+                    this.minitSections.forEach(section => {
+                        const susunanBorang = ['Borang 1', 'Borang 5', 'Brownfield', 'null'];
+                        susunanBorang.forEach(b => {
+                            if (section.items[b]) {
+                                sorted.push(...section.items[b]);
+                            }
+                        });
+                    });
+                    return sorted;
                 },
 				
                 senaraiHadir() {

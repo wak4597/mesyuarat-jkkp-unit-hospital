@@ -510,7 +510,7 @@
 
                     <!-- Main Minutes Generation -->
                     <div>
-                        <div v-for="(section, sIdx) in " :key="sIdx">
+                        <div v-for="(section, sIdx) in minitSections" :key="sIdx">
                             <!-- Section Title -->
                             <p style="font-weight: bold; text-transform: uppercase; text-decoration: underline; margin-top: 24px; margin-bottom: 8px;">{{ section.title }}</p>
                             
@@ -752,7 +752,7 @@ createApp({
                     extractSection('Hal-hal Lain', '3. HAL-HAL LAIN');
 
                     return sections;
-                }
+                },
 				
                 senaraiHadir() {
                     return this.senaraiPegawai.filter(p => p.status === 'Hadir');

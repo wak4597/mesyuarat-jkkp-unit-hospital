@@ -510,7 +510,7 @@
 
                     <!-- Main Minutes Generation -->
                     <div>
-                        <div v-for="(section, sIdx) in minitSections" :key="sIdx">
+                        <div v-for="(section, sIdx) in " :key="sIdx">
                             <!-- Section Title -->
                             <p style="font-weight: bold; text-transform: uppercase; text-decoration: underline; margin-top: 24px; margin-bottom: 8px;">{{ section.title }}</p>
                             
@@ -727,12 +727,18 @@ createApp({
                         const appsInKategori = this.applications.filter(a => a.kategori === kategoriName);
                         if (appsInKategori.length > 0) {
                             const items = {};
-                            // Group by Borang
-                            appsInKategori.forEach(app => {
-                                const b = app.borang || 'null';
-                                if (!items[b]) items[b] = [];
-                                items[b].push(app);
+                            
+                            // TENTUKAN SUSUNAN TETAP DI SINI (Borang 1 -> Borang 5 -> Brownfield)
+                            const susunanBorang = ['Borang 1', 'Borang 5', 'Brownfield', 'null'];
+
+                            // Kumpulkan data mengikut susunan tetap
+                            susunanBorang.forEach(jenisBorang => {
+                                const matchedApps = appsInKategori.filter(app => (app.borang || 'null') === jenisBorang);
+                                if (matchedApps.length > 0) {
+                                    items[jenisBorang] = matchedApps;
+                                }
                             });
+
                             sections.push({
                                 index: secIndex++,
                                 title: title,

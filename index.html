@@ -226,7 +226,7 @@
             <div v-show="activeTab === 'agenda'" class="max-w-4xl mx-auto">
                 <div class="flex justify-end mb-4 no-print space-x-2">
                     <button @click="exportWord('doc1-content', 'Senarai_Premis.doc')" class="bg-blue-600 text-white px-4 py-2 rounded shadow flex items-center gap-2">
-                        Eksport ke Word (.docx)
+                        Eksport ke Word (.doc)
                     </button>
                 </div>
                 
@@ -429,7 +429,7 @@
                         Cetak PDF
                     </button>
                     <button @click="exportWord('doc2-content', 'Minit_Mesyuarat.doc')" class="bg-blue-600 text-white px-4 py-2 rounded shadow flex items-center gap-2">
-                        Eksport ke Word (.docx)
+                        Eksport ke Word (.doc)
                     </button>
                 </div>
                 
@@ -466,7 +466,7 @@
                             <p style="font-weight: bold; margin-top: 0; margin-bottom: 8px;">HADIR:</p>
                             <div>
                                 <div v-for="pegawai in senaraiHadir" :key="pegawai.nama" style="margin-bottom: 8px; line-height: 1.2;">
-                                    <span style="display: block;">{{ pegawai.nama }}</span>
+                                    <span style="font-weight: bold;">{{ pegawai.nama }}</span>
                                     <span v-if="pegawai.pangkat">
                                         <br>
                                         <span style="font-size: 9pt;">{{ pegawai.pangkat }}</span>
@@ -479,7 +479,7 @@
                             <p style="font-weight: bold; margin-top: 0; margin-bottom: 8px;">TIDAK HADIR DENGAN MAAF:</p>
                             <div>
                                 <div v-for="pegawai in senaraiTidakHadir" :key="pegawai.nama" style="margin-bottom: 8px; line-height: 1.2;">
-                                    <span style="display: block;">{{ pegawai.nama }}</span>
+                                    <span style="font-weight: bold;">{{ pegawai.nama }}</span>
                                     <span v-if="pegawai.pangkat">
                                         <br>
                                         <span style="font-size: 9pt;">{{ pegawai.pangkat }}</span>
@@ -492,7 +492,7 @@
                             <p style="font-weight: bold; margin-top: 0; margin-bottom: 8px;">URUSETIA:</p>
                             <div>
                                 <div v-for="pegawai in senaraiUrusetia" :key="pegawai.nama" style="margin-bottom: 8px; line-height: 1.2;">
-                                    <span style="display: block;">{{ pegawai.nama }}</span>
+                                    <span style="font-weight: bold;">{{ pegawai.nama }}</span>
                                     <span v-if="pegawai.pangkat">
                                         <br>
                                         <span style="font-size: 9pt;">{{ pegawai.pangkat }}</span>
@@ -616,66 +616,65 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, onSnapshot, runTransaction } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js"; 
-// Expose getDoc globally so the login method can reach it
-window.VueFirebaseGetDoc = getDoc;
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, onSnapshot, runTransaction } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js"; 
 
-// Setup Firebase Configurations from Environment
-const appId = 'mesyuarat-jkkp-app';
-const firebaseConfig = {
-  apiKey: "AIzaSyC93JkkRW7cIiE1ROdtkoz-M1VRyLFK0ac",
-  authDomain: "mesyuarat-jkkp-unit-hospital.firebaseapp.com",
-  projectId: "mesyuarat-jkkp-unit-hospital",
-  storageBucket: "mesyuarat-jkkp-unit-hospital.firebasestorage.app",
-  messagingSenderId: "921770044131",
-  appId: "1:921770044131:web:f42dc166b38c89712573d6",
-  measurementId: "G-79TPW6NSX8"
-};
+        window.VueFirebaseGetDoc = getDoc;
 
-let db, auth;
-if (Object.keys(firebaseConfig).length > 0) {
-    const firebaseApp = initializeApp(firebaseConfig);
-    db = getFirestore(firebaseApp);
-    auth = getAuth(firebaseApp);
-}
+        const appId = 'mesyuarat-jkkp-app';
+        const firebaseConfig = {
+          apiKey: "AIzaSyC93JkkRW7cIiE1ROdtkoz-M1VRyLFK0ac",
+          authDomain: "mesyuarat-jkkp-unit-hospital.firebaseapp.com",
+          projectId: "mesyuarat-jkkp-unit-hospital",
+          storageBucket: "mesyuarat-jkkp-unit-hospital.firebasestorage.app",
+          messagingSenderId: "921770044131",
+          appId: "1:921770044131:web:f42dc166b38c89712573d6",
+          measurementId: "G-79TPW6NSX8"
+        };
 
-const { createApp } = Vue;
+        let db, auth;
+        if (Object.keys(firebaseConfig).length > 0) {
+            const firebaseApp = initializeApp(firebaseConfig);
+            db = getFirestore(firebaseApp);
+            auth = getAuth(firebaseApp);
+        }
 
-createApp({
-    data() {
-        return {
-            showLoginModal: true,
-			isInitialDataLoad: true,
-            googleAuthenticated: false,
-            loggedInEmail: '',
-            loginError: '',
-            currentUser: null,
-            userRole: 'urusetia',
-            activeTab: 'butiran',
-            meetingId: '',
-            shareLink: '',
-            copied: false,
-            isNewMeeting: false,
-			senaraiItalic: ['Comply', 'Not Comply', 'Minor', 'KIV', 'Custom', 'Pending', 'Update', 'Access', 'Administration', 'Adult', 'Andrology', 'Angiography', 'Assessment', 'Asthma', 'Autoclave', 'Baby', 'Balance', 'Base', 'Basement', 'Bath', 'Bay', 
-    						'Bed', 'Biohazard', 'Biplane', 'Blood', 'Bobath', 'Booth', 'Breastfeeding', 'Bridge', 'Brownfield', 'Business', 'Cabinet', 'Cardiac', 'Cardiologist', 'Care', 'Cashier', 'Catheterization', 'Cathlab', 'Cell', 'Centre', 'Chair', 
-    						'Change', 'Changing', 'Chemical', 'Chemotherapy', 'Clean', 'Clerk', 'Clinic', 'Clinical', 'Closet', 'Cold', 'Collection', 'Computed', 'Conference', 'Consultant', 'Consultation', 'Consumable', 'Continuous', 'Control', 
-    						'Coronary', 'Corridor', 'Counselling', 'Counter', 'Cryostorage', 'Culture', 'Customer', 'Cytogenetic', 'Cytology', 'Cytoscreener', 'Cytotoxic', 'Dark', 'Data', 'Daycare', 'Dayward', 'Delivery', 'Deluxe', 'Dental', 'Department', 
-    						'Diagnostic', 'Dialysis', 'Dietitian', 'Digital', 'Director', 'Dirty', 'Disable', 'Discharge', 'Discussion', 'Doctor', 'Document', 'Dressing', 'Drop', 'Drug', 'East', 'Echo', 'Echocardiography', 'Education', 
-    						'Electrophysiology', 'Embryology', 'Emergency', 'Empty', 'Endoscopy', 'Entrance', 'Entry', 'Equipment', 'Examination', 'Exchange', 'Exercise', 'Existing', 'Expansion', 'Extracorporeal', 'Eye', 'Facade', 'Facility', 'Facilities', 'Family', 
-    						'Female', 'Floor', 'Fluoroscopy', 'Food', 'Function', 'Future', 'Garden', 'General', 'Genetic', 'Green', 'Grieving', 'Ground', 'Gym', 'Gymnasium', 'Health', 'Hearing', 'Heart', 'Holding', 'Hot', 'House', 'Hydro', 'Ice', 
-    						'Image', 'Imaging', 'Incubator', 'Injection', 'Inpatient', 'Interview', 'Inventory', 'Isolation', 'Item', 'Janitor', 'Kitchen', 'Lab', 'Laboratory', 'Labour', 'Laser', 'Level', 'Linen', 'Lithotripsy', 'Lobby', 'Locker', 
-    						'Lounge', 'Lung', 'Machine', 'Major', 'Male', 'Mammogram', 'Manager', 'Masturbatorium', 'Maternity', 'Medical', 'Medication', 'Medicine', 'Meeting', 'Men', 'Mezzanine', 'Microbiology', 'Microscopy', 'Milk', 'Mobile', 'Moulding', 
-    						'Nappy', 'Negative', 'New', 'Nuclear', 'Nurse', 'Nursery', 'Nursing', 'Observation', 'Occupational', 'Office', 'Oncall', 'Oncology', 'Open', 'Operation', 'Optometrist', 'Optometry', 'Orthopaedic', 'Osmosis', 'Outpatient', 
-    						'Paediatric', 'Pantry', 'Park', 'Parking', 'Patient', 'Pendant', 'Pharmacy', 'Pharmaceutical', 'Phlebotomy', 'Phototherapy', 'Physical', 'Physiotherapy', 'Plan', 'Play', 'Pool', 'Porch', 'Positive', 'Prayer', 'Preimplantation', 'Preparation', 
-    						'Pressure', 'Procedure', 'Processing', 'Psychology', 'Public', 'Radiography', 'Radiologist', 'Radiotherapy', 'Reception', 'Record', 'Recovery', 'Rehab', 'Rehabilitation', 'Renal', 'Replacement', 'Report', 'Reporting', 'Reprocessor', 'Rest', 
-    						'Resuscitation', 'Reverse', 'Roof', 'Room', 'Rota', 'Scan', 'Scanner', 'Scope', 'Screening', 'Scrub', 'Sensory', 'Service', 'Shock', 'Shower', 'Silent', 'Simulator', 'Single', 'Sister', 'Sleep', 'Specialist', 'Speech', 
-    						'Spirometry', 'Splinting', 'Sputum', 'Staff', 'Station', 'Store', 'Stress', 'Stretcher', 'Suite', 'Supply', 'Support', 'Surgeon', 'Surgical', 'Tea', 'Technical', 'Test', 'Testing', 'Theatre', 'Therapy', 'Tissue', 'Toilet', 'Tomography', 
-    						'Tower', 'Treatment', 'Triage', 'Trolley', 'Ultrasound', 'Uptake', 'Utility', 'Vacant', 'Vascular', 'Vestibular', 'VIP', 'Visual', 'Waiting', 'Ward', 'Wash', 'Wave', 'Wax', 'Wheelchair', 'Wing', 'Women', 'Work', 
-    						'X-Ray', 'Yellow', 'Zone', 'Post', 'PET/CT', 'Audiology', 'Audiometry', 'Block', 'High', 'Dependency', 'Intensive', 'Lung', 'Function', 'Otorhinolaryngology', 'Ophthalmology'],
-            isRemoteUpdate: false,
-            saveTimeout: null,
-            butiran: {
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    showLoginModal: true,
+                    isInitialDataLoad: true,
+                    googleAuthenticated: false,
+                    loggedInEmail: '',
+                    loginError: '',
+                    currentUser: null,
+                    userRole: 'urusetia',
+                    activeTab: 'butiran',
+                    meetingId: '',
+                    shareLink: '',
+                    copied: false,
+                    isNewMeeting: false,
+                    senaraiItalic: ['Comply', 'Not Comply', 'Minor', 'KIV', 'Custom', 'Pending', 'Update', 'Access', 'Administration', 'Adult', 'Andrology', 'Angiography', 'Assessment', 'Asthma', 'Autoclave', 'Baby', 'Balance', 'Base', 'Basement', 'Bath', 'Bay', 
+                                    'Bed', 'Biohazard', 'Biplane', 'Blood', 'Bobath', 'Booth', 'Breastfeeding', 'Bridge', 'Brownfield', 'Business', 'Cabinet', 'Cardiac', 'Cardiologist', 'Care', 'Cashier', 'Catheterization', 'Cathlab', 'Cell', 'Centre', 'Chair', 
+                                    'Change', 'Changing', 'Chemical', 'Chemotherapy', 'Clean', 'Clerk', 'Clinic', 'Clinical', 'Closet', 'Cold', 'Collection', 'Computed', 'Conference', 'Consultant', 'Consultation', 'Consumable', 'Continuous', 'Control', 
+                                    'Coronary', 'Corridor', 'Counselling', 'Counter', 'Cryostorage', 'Culture', 'Customer', 'Cytogenetic', 'Cytology', 'Cytoscreener', 'Cytotoxic', 'Dark', 'Data', 'Daycare', 'Dayward', 'Delivery', 'Deluxe', 'Dental', 'Department', 
+                                    'Diagnostic', 'Dialysis', 'Dietitian', 'Digital', 'Director', 'Dirty', 'Disable', 'Discharge', 'Discussion', 'Doctor', 'Document', 'Dressing', 'Drop', 'Drug', 'East', 'Echo', 'Echocardiography', 'Education', 
+                                    'Electrophysiology', 'Embryology', 'Emergency', 'Empty', 'Endoscopy', 'Entrance', 'Entry', 'Equipment', 'Examination', 'Exchange', 'Exercise', 'Existing', 'Expansion', 'Extracorporeal', 'Eye', 'Facade', 'Facility', 'Facilities', 'Family', 
+                                    'Female', 'Floor', 'Fluoroscopy', 'Food', 'Function', 'Future', 'Garden', 'General', 'Genetic', 'Green', 'Grieving', 'Ground', 'Gym', 'Gymnasium', 'Health', 'Hearing', 'Heart', 'Holding', 'Hot', 'House', 'Hydro', 'Ice', 
+                                    'Image', 'Imaging', 'Incubator', 'Injection', 'Inpatient', 'Interview', 'Inventory', 'Isolation', 'Item', 'Janitor', 'Kitchen', 'Lab', 'Laboratory', 'Labour', 'Laser', 'Level', 'Linen', 'Lithotripsy', 'Lobby', 'Locker', 
+                                    'Lounge', 'Lung', 'Machine', 'Major', 'Male', 'Mammogram', 'Manager', 'Masturbatorium', 'Maternity', 'Medical', 'Medication', 'Medicine', 'Meeting', 'Men', 'Mezzanine', 'Microbiology', 'Microscopy', 'Milk', 'Mobile', 'Moulding', 
+                                    'Nappy', 'Negative', 'New', 'Nuclear', 'Nurse', 'Nursery', 'Nursing', 'Observation', 'Occupational', 'Office', 'Oncall', 'Oncology', 'Open', 'Operation', 'Optometrist', 'Optometry', 'Orthopaedic', 'Osmosis', 'Outpatient', 
+                                    'Paediatric', 'Pantry', 'Park', 'Parking', 'Patient', 'Pendant', 'Pharmacy', 'Pharmaceutical', 'Phlebotomy', 'Phototherapy', 'Physical', 'Physiotherapy', 'Plan', 'Play', 'Pool', 'Porch', 'Positive', 'Prayer', 'Preimplantation', 'Preparation', 
+                                    'Pressure', 'Procedure', 'Processing', 'Psychology', 'Public', 'Radiography', 'Radiologist', 'Radiotherapy', 'Reception', 'Record', 'Recovery', 'Rehab', 'Rehabilitation', 'Renal', 'Replacement', 'Report', 'Reporting', 'Reprocessor', 'Rest', 
+                                    'Resuscitation', 'Reverse', 'Roof', 'Room', 'Rota', 'Scan', 'Scanner', 'Scope', 'Screening', 'Scrub', 'Sensory', 'Service', 'Shock', 'Shower', 'Silent', 'Simulator', 'Single', 'Sister', 'Sleep', 'Specialist', 'Speech', 
+                                    'Spirometry', 'Splinting', 'Sputum', 'Staff', 'Station', 'Store', 'Stress', 'Stretcher', 'Suite', 'Supply', 'Support', 'Surgeon', 'Surgical', 'Tea', 'Technical', 'Test', 'Testing', 'Theatre', 'Therapy', 'Tissue', 'Toilet', 'Tomography', 
+                                    'Tower', 'Treatment', 'Triage', 'Trolley', 'Ultrasound', 'Uptake', 'Utility', 'Vacant', 'Vascular', 'Vestibular', 'VIP', 'Visual', 'Waiting', 'Ward', 'Wash', 'Wave', 'Wax', 'Wheelchair', 'Wing', 'Women', 'Work', 
+                                    'X-Ray', 'Yellow', 'Zone', 'Post', 'PET/CT', 'Audiology', 'Audiometry', 'Block', 'High', 'Dependency', 'Intensive', 'Lung', 'Function', 'Otorhinolaryngology', 'Ophthalmology'],
+                    isRemoteUpdate: false,
+                    saveTimeout: null,
+                    butiran: {
                         bil: '',
                         tarikh: '',
                         masa: '',
@@ -697,7 +696,7 @@ createApp({
                         { nama: 'Dr. Nur Liyana binti Hanapi', shortName: 'Dr. Liyana', status: 'Hadir', pangkat: 'Ketua Penolong Pengarah' },
                         { nama: 'Dr. Hapizi bin Mohd Yunus', shortName: 'Dr. Hapizi', status: 'Urusetia', pangkat: 'Ketua Penolong Pengarah' },
                         { nama: 'Dr. Muhamad Aliff Adha bin Ali', shortName: 'Dr. Aliff', status: 'Urusetia', pangkat: 'Ketua Penolong Pengarah' },            
-                        { nama: 'Dr. Nurain binti Zainuddin', shortName: 'Dr. Nurain', status: 'Hadir',pangkat: 'Penolong Pengarah' },              
+                        { nama: 'Dr. Nurain binti Zainuddin', shortName: 'Dr. Nurain', status: 'Hadir', pangkat: 'Penolong Pengarah' },              
                     ],
                     pegawaiBaru: '',
                     form: {
@@ -710,24 +709,21 @@ createApp({
                         pegawai: ''
                     },
                     applications: [],
-					deletedAppIds: []
+                    deletedAppIds: []
                 }
             },
             computed: {
-				senaraiFailUnik() {
-        			const semuaFail = this.applications.map(a => a.noFail).filter(Boolean);
-        			return [...new Set(semuaFail)]; // Remove duplicates
-    			},
+                senaraiFailUnik() {
+                    const semuaFail = this.applications.map(a => a.noFail).filter(Boolean);
+                    return [...new Set(semuaFail)];
+                },
                 minitSections() {
                     const sections = [];
                     let secIndex = 1;
-
-                    // Helper to group by Kategori & Borang
                     const extractSection = (kategoriName, title) => {
                         const appsInKategori = this.applications.filter(a => a.kategori === kategoriName);
                         if (appsInKategori.length > 0) {
                             const items = {};
-                            // Group by Borang
                             appsInKategori.forEach(app => {
                                 const b = app.borang || 'null';
                                 if (!items[b]) items[b] = [];
@@ -740,11 +736,9 @@ createApp({
                             });
                         }
                     };
-
                     extractSection('Berbangkit', '1. PERKARA BERBANGKIT');
                     extractSection('Baru', '2. PEMBENTANGAN PERMOHONAN BARU');
                     extractSection('Hal-hal Lain', '3. HAL-HAL LAIN');
-
                     return sections;
                 },
                 senaraiHadir() {
@@ -758,7 +752,6 @@ createApp({
                 }
             },
             watch: {
-                // Auto-generate Keputusan text based on dropdown change
                 applications: {
                     deep: true,
                     handler(newVal) {
@@ -782,41 +775,38 @@ createApp({
                 senaraiPegawai: { deep: true, handler() { this.triggerSave(); } }
             },
             async mounted() {
-                // Sediakan pangkalan data awan
                 if (!db || !auth) return;
-
                 try {
-                    // Authenticate
-
-                    // Urus Meeting ID dari URL
                     const urlParams = new URLSearchParams(window.location.search);
                     let id = urlParams.get('id');
-										
+                                        
                     if (!id) {
                         this.isNewMeeting = true;
-						id = Date.now().toString(36) + Math.random().toString(36).substr(2, 4);
+                        id = Date.now().toString(36) + Math.random().toString(36).substr(2, 4);
                         try {
                             window.history.pushState({}, '', `?id=${id}`);
                         } catch (e) {
-                            console.warn("Amaran: Berada dalam mod prebiu, URL tidak dapat ditukar. Meneruskan sambungan pangkalan data dengan ID sementara.", e);
+                            console.warn("Amaran: Berada dalam mod prebiu", e);
                         }
                     }
                     this.meetingId = id;
                     
-                    // Bina Pautan Perkongsian
                     try {
                         const urlObj = new URL(window.location.href);
                         urlObj.searchParams.set('id', id);
                         this.shareLink = urlObj.toString();
                     } catch (e) {
-                        // Fallback untuk mod prebiu jika pembinaan URL gagal
                         this.shareLink = window.location.href + (window.location.href.includes('?') ? '&' : '?') + 'id=' + id;
                     }
-
-                    // Listen ke Firestore (Real-time updates)
+                } catch (error) {
+                    console.error("Cloud Setup Error:", error);
+                }
+            },
+            methods: {
+                setupFirebaseListener() {
+                    if (!db || !this.meetingId) return;
                     const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'meetings', this.meetingId);
                     
-                    // Rujukan pangkat lalai untuk baiki data lama dari Firebase
                     const rujukanPangkat = [
                         { nama: 'Dr. Alicia Liew Hsiao Hui', pangkat: 'Ketua Penolong Pengarah Kanan' },
                         { nama: 'Dr. Nurul ‘Ain binti Selamat @ Keliwon', pangkat: 'Ketua Penolong Pengarah Kanan' },
@@ -841,8 +831,6 @@ createApp({
                             
                             if (this.isInitialDataLoad || this.userRole !== 'urusetia') {
                                 if(data.butiran) this.butiran = data.butiran;
-                                
-                                // PROSES GABUNGAN DATA (MENGHALANG FIREBASE PADAM PANGKAT)
                                 if(data.senaraiPegawai) {
                                     this.senaraiPegawai = data.senaraiPegawai.map(pegawaiDb => {
                                         if (!pegawaiDb.pangkat) {
@@ -853,149 +841,129 @@ createApp({
                                     });
                                 }
                             }
-                            
                             if(data.applications) this.applications = data.applications;                            
-                            
-                            // Tutup initial load supaya tidak berulang
                             this.isInitialDataLoad = false; 
 
-                            // Re-enable autosave after UI applies the remote update
                             this.$nextTick(() => {
                                 this.isRemoteUpdate = false;
-                                // Paksa save ke awan sekali lagi untuk simpan pangkat baru ke data lama
                                 if (this.userRole === 'urusetia') this.triggerSave(); 
                             });
                         }
                     }, (error) => {
                         console.error("Firebase listen error:", error);
                     });
-                } catch (error) {
-                    console.error("Cloud Setup Error:", error);
-                }
-            },
-            methods: {
-				formatItalicLive(text) {
-    if (!text) return '';
-    let result = text;
-    this.senaraiItalic.forEach(word => {
-        // The (?:e?s)? part looks for an optional 's' or 'es' at the end of the word
-        // The 'gi' flag makes it case-insensitive
-        const regex = new RegExp(`\\b(${word}(?:e?s)?)\\b`, 'gi');
-        result = result.replace(regex, '<i>$1</i>');
-    });
-    return result;
-},
-				async setAsActiveMeeting() {
-    if (!db || !this.meetingId) return;
-    try {
-        const activeRef = doc(db, 'artifacts', appId, 'public', 'data', 'active', 'latest');
-        await setDoc(activeRef, { 
-            meetingId: this.meetingId, 
-            tarikhKemasKini: new Date().toISOString() 
-        });
-        alert("Berjaya! Pengguna Google Sites kini akan dihalakan terus ke mesyuarat ini.");
-    } catch(e) {
-        alert("Gagal menetapkan mesyuarat aktif: " + e.message);
-    }
-},
-				async loginWithGoogle() {
-    const provider = new GoogleAuthProvider();
-    try {
-        const result = await signInWithPopup(auth, provider);
-        const email = result.user.email;
-        
-        // MAP EMAILS TO SHORT NAMES DIRECTLY
-        const emailUserMap = {
-            'hapizi.yunus@moh.gov.my': 'Dr. Hapizi',
-			'drnurulain@moh.gov.my': 'Dr. Nurul ‘Ain',
-			'mohdzulfahmi@moh.gov.my': 'Dr. Zulfahmi',
-			'nurzaimah.ab@moh.gov.my': 'Dr. Nurzaimah',
-			'azrin.samsuddin@moh.gov.my': 'Dr. Azrin',
-            'adibahanim@moh.gov.my': 'Dr. Adibah',
-			'nurazwani@moh.gov.my': 'Dr. Nurazwani',
-			'quahyy@moh.gov.my': 'Dr. Quah', 
-			'denisegoh@moh.gov.my': 'Dr. Denise',
-			'syazwini@moh.gov.my': 'Dr. Syazwini',
-            'nur.liyana@moh.gov.my': 'Dr. Liyana',
-			'aliffadha@moh.gov.my': 'Dr. Aliff',
-			'nurain.zainuddin@moh.gov.my': 'Dr. Nurain',
-			'alicia_lhh@moh.gov.my': 'Dr. Alicia',
-			'wak4597@gmail.com': 'Dr. Nurain'
-        };
-        
-        const matchedShortName = emailUserMap[email];
-        
-        if (matchedShortName) {
-            // Find the user's full profile in senaraiPegawai
-            const matchedPegawai = this.senaraiPegawai.find(p => p.shortName === matchedShortName);
-            
-            if (matchedPegawai) {
-                this.currentUser = matchedPegawai;
-                this.loginError = '';
-                this.login(); // Auto-login and close the modal instantly
-            } else {
-                this.loginError = "Ralat: Profil anda tidak dijumpai dalam senarai sistem.";
-                await signOut(auth);
-            }
-        } else {
-            this.loginError = "Akses ditolak: Emel " + email + " tidak dibenarkan.";
-            await signOut(auth);
-        }
-    } catch (error) {
-        this.loginError = "Ralat log masuk: " + error.message;
-    }
-},
-	async login() {
-    if (!this.currentUser) return;
-    
-    const urlParams = new URLSearchParams(window.location.search);
-    let currentId = urlParams.get('id');
+                },
+                formatItalicLive(text) {
+                    if (!text) return '';
+                    let result = text;
+                    this.senaraiItalic.forEach(word => {
+                        const regex = new RegExp(`\\b(${word}(?:e?s)?)\\b`, 'gi');
+                        result = result.replace(regex, '<i>$1</i>');
+                    });
+                    return result;
+                },
+                async setAsActiveMeeting() {
+                    if (!db || !this.meetingId) return;
+                    try {
+                        const activeRef = doc(db, 'artifacts', appId, 'public', 'data', 'active', 'latest');
+                        await setDoc(activeRef, { 
+                            meetingId: this.meetingId, 
+                            tarikhKemasKini: new Date().toISOString() 
+                        });
+                        alert("Berjaya! Pengguna Google Sites kini akan dihalakan terus ke mesyuarat ini.");
+                    } catch(e) {
+                        alert("Gagal menetapkan mesyuarat aktif: " + e.message);
+                    }
+                },
+                async loginWithGoogle() {
+                    const provider = new GoogleAuthProvider();
+                    try {
+                        const result = await signInWithPopup(auth, provider);
+                        const email = result.user.email;
+                        
+                        const emailUserMap = {
+                            'hapizi.yunus@moh.gov.my': 'Dr. Hapizi',
+                            'drnurulain@moh.gov.my': 'Dr. Nurul ‘Ain',
+                            'mohdzulfahmi@moh.gov.my': 'Dr. Zulfahmi',
+                            'nurzaimah.ab@moh.gov.my': 'Dr. Nurzaimah',
+                            'azrin.samsuddin@moh.gov.my': 'Dr. Azrin',
+                            'adibahanim@moh.gov.my': 'Dr. Adibah',
+                            'nurazwani@moh.gov.my': 'Dr. Nurazwani',
+                            'quahyy@moh.gov.my': 'Dr. Quah', 
+                            'denisegoh@moh.gov.my': 'Dr. Denise',
+                            'syazwini@moh.gov.my': 'Dr. Syazwini',
+                            'nur.liyana@moh.gov.my': 'Dr. Liyana',
+                            'aliffadha@moh.gov.my': 'Dr. Aliff',
+                            'nurain.zainuddin@moh.gov.my': 'Dr. Nurain',
+                            'alicia_lhh@moh.gov.my': 'Dr. Alicia',
+                            'wak4597@gmail.com': 'Dr. Nurain'
+                        };
+                        
+                        const matchedShortName = emailUserMap[email];
+                        if (matchedShortName) {
+                            const matchedPegawai = this.senaraiPegawai.find(p => p.shortName === matchedShortName);
+                            if (matchedPegawai) {
+                                this.currentUser = matchedPegawai;
+                                this.loginError = '';
+                                this.login();
+                            } else {
+                                this.loginError = "Ralat: Profil anda tidak dijumpai dalam senarai sistem.";
+                                await signOut(auth);
+                            }
+                        } else {
+                            this.loginError = "Akses ditolak: Emel " + email + " tidak dibenarkan.";
+                            await signOut(auth);
+                        }
+                    } catch (error) {
+                        this.loginError = "Ralat log masuk: " + error.message;
+                    }
+                },
+                async login() {
+                    if (!this.currentUser) return;
+                    const urlParams = new URLSearchParams(window.location.search);
+                    let currentId = urlParams.get('id');
 
-    // CHECK FOR 'terkini' REDIRECT AFTER LOGIN
-    if (currentId === 'terkini') {
-        try {
-            const activeRef = doc(db, 'artifacts', appId, 'public', 'data', 'active', 'latest');
-            // You must import getDoc at the top of your scripts for this to work
-            const snap = await window.VueFirebaseGetDoc(activeRef); 
-            
-            if (snap.exists() && snap.data().meetingId) {
-                window.location.replace('?id=' + snap.data().meetingId);
-                return; // Stop and let browser redirect
-            } else {
-                alert("Ralat: Tiada mesyuarat aktif ditetapkan oleh Urusetia pada masa ini.");
-                this.googleAuthenticated = false;
-                this.currentUser = null;
-                if (typeof signOut !== 'undefined' && auth) signOut(auth);
-                return;
-            }
-        } catch (e) {
-            console.error("Gagal mendapatkan link terkini", e);
-            alert("Ralat sistem semasa memuat turun pautan terkini.");
-            return;
-        }
-    }
+                    if (currentId === 'terkini') {
+                        try {
+                            const activeRef = doc(db, 'artifacts', appId, 'public', 'data', 'active', 'latest');
+                            const snap = await window.VueFirebaseGetDoc(activeRef); 
+                            
+                            if (snap.exists() && snap.data().meetingId) {
+                                window.location.replace('?id=' + snap.data().meetingId);
+                                return;
+                            } else {
+                                alert("Ralat: Tiada mesyuarat aktif ditetapkan oleh Urusetia pada masa ini.");
+                                this.googleAuthenticated = false;
+                                this.currentUser = null;
+                                if (typeof signOut !== 'undefined' && auth) signOut(auth);
+                                return;
+                            }
+                        } catch (e) {
+                            console.error("Gagal mendapatkan link terkini", e);
+                            alert("Ralat sistem semasa memuat turun pautan terkini.");
+                            return;
+                        }
+                    }
 
-    // Tetapkan tahap akses
-    if (this.currentUser.status === 'Urusetia') {
-        this.userRole = 'urusetia';
-        this.activeTab = 'butiran';
-        this.showLoginModal = false;
-    } else {
-        // SEKAT PEGAWAI JIKA BUKAN DARI LINK KONGSIAN URUSETIA ATAU TERKINI
-        if (this.isNewMeeting) { 
-            alert("AKSES DITOLAK: Sila klik pautan (link) mesyuarat rasmi yang dikongsi oleh Urusetia.");
-            this.currentUser = null; 
-            this.googleAuthenticated = false; 
-            if (typeof signOut !== 'undefined' && auth) signOut(auth); 
-            return; 
-        }
-        
-        this.userRole = 'pegawai';
-        this.activeTab = 'daftar';
-        this.form.pegawai = this.currentUser.shortName;
-        this.showLoginModal = false;
-    }
-},
+                    if (this.currentUser.status === 'Urusetia') {
+                        this.userRole = 'urusetia';
+                        this.activeTab = 'butiran';
+                        this.showLoginModal = false;
+                    } else {
+                        if (this.isNewMeeting) { 
+                            alert("AKSES DITOLAK: Sila klik pautan (link) mesyuarat rasmi yang dikongsi oleh Urusetia.");
+                            this.currentUser = null; 
+                            this.googleAuthenticated = false; 
+                            if (typeof signOut !== 'undefined' && auth) signOut(auth); 
+                            return; 
+                        }
+                        this.userRole = 'pegawai';
+                        this.activeTab = 'daftar';
+                        this.form.pegawai = this.currentUser.shortName;
+                        this.showLoginModal = false;
+                    }
+                    this.setupFirebaseListener();
+                },
                 copyLink() {
                     const tempInput = document.createElement("input");
                     tempInput.value = this.shareLink;
@@ -1003,105 +971,80 @@ createApp({
                     tempInput.select();
                     document.execCommand("copy");
                     document.body.removeChild(tempInput);
-                    
                     this.copied = true;
                     setTimeout(() => this.copied = false, 3000);
                 },
                 triggerSave() {
                     if (this.isRemoteUpdate || !db || !this.meetingId) return;
-                    
                     clearTimeout(this.saveTimeout);
                     this.saveTimeout = setTimeout(() => {
                         this.saveToCloud();
-                    }, 1000); // Tunggu 1 saat lepas habis menaip baru save (jimat kuota database)
+                    }, 1000);
                 },
                 async saveToCloud() {
-    if (this.isRemoteUpdate || !db || !this.meetingId) return;
-    try {
-        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'meetings', this.meetingId);
-
-        await runTransaction(db, async (transaction) => {
-            const cloudDoc = await transaction.get(docRef);
-
-            if (!cloudDoc.exists()) {
-                // Simpanan kali pertama
-                transaction.set(docRef, {
-                    butiran: JSON.parse(JSON.stringify(this.butiran)),
-                    applications: JSON.parse(JSON.stringify(this.applications)),
-                    senaraiPegawai: JSON.parse(JSON.stringify(this.senaraiPegawai))
-                });
-            } else {
-                const cloudData = cloudDoc.data();
-                const cloudApps = cloudData.applications || [];
-                const localApps = JSON.parse(JSON.stringify(this.applications));
-
-                // Gabungkan senarai cloud dan local secara selamat
-                const mergedMap = new Map();
-
-                // 1. Masukkan data cloud (kecuali yang baru dibuang oleh user ini)
-                cloudApps.forEach(app => {
-                    if (!this.deletedAppIds.includes(app.id)) {
-                        mergedMap.set(app.id, app);
+                    if (this.isRemoteUpdate || !db || !this.meetingId) return;
+                    try {
+                        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'meetings', this.meetingId);
+                        await runTransaction(db, async (transaction) => {
+                            const cloudDoc = await transaction.get(docRef);
+                            if (!cloudDoc.exists()) {
+                                transaction.set(docRef, {
+                                    butiran: JSON.parse(JSON.stringify(this.butiran)),
+                                    applications: JSON.parse(JSON.stringify(this.applications)),
+                                    senaraiPegawai: JSON.parse(JSON.stringify(this.senaraiPegawai))
+                                });
+                            } else {
+                                const cloudData = cloudDoc.data();
+                                const cloudApps = cloudData.applications || [];
+                                const localApps = JSON.parse(JSON.stringify(this.applications));
+                                const mergedMap = new Map();
+                                cloudApps.forEach(app => {
+                                    if (!this.deletedAppIds.includes(app.id)) {
+                                        mergedMap.set(app.id, app);
+                                    }
+                                });
+                                localApps.forEach(app => mergedMap.set(app.id, app));
+                                const finalApps = Array.from(mergedMap.values());
+                                const updateData = { applications: finalApps };
+                                if (this.userRole === 'urusetia') {
+                                    updateData.butiran = JSON.parse(JSON.stringify(this.butiran));
+                                    updateData.senaraiPegawai = JSON.parse(JSON.stringify(this.senaraiPegawai));
+                                }
+                                transaction.update(docRef, updateData);
+                            }
+                        });
+                        this.deletedAppIds = [];
+                    } catch(e) {
+                        console.error("Ralat menyimpan data:", e);
                     }
-                });
-
-                // 2. Timpa/Tambah data dari skrin user ini
-                localApps.forEach(app => mergedMap.set(app.id, app));
-
-                const finalApps = Array.from(mergedMap.values());
-
-				// ASINGKAN DATA YANG INGIN DIKEMASKINI (FIX IS HERE)
-				const updateData = {
-   					applications: finalApps
-				};
-
-				// Hanya urusetia dibenarkan untuk overwrite butiran & senarai pegawai di cloud
-				if (this.userRole === 'urusetia') {
-    				updateData.butiran = JSON.parse(JSON.stringify(this.butiran));
-   					updateData.senaraiPegawai = JSON.parse(JSON.stringify(this.senaraiPegawai));
-				}
-
-				// Hantar update ke Firestore
-				transaction.update(docRef, updateData);
-            }
-        });
-        // Kosongkan memori buang selepas berjaya sync
-        this.deletedAppIds = [];
-    } catch(e) {
-        console.error("Ralat menyimpan data (Transaction Error):", e);
-    }
-},
-buangPermohonan(index) {
-    // Rekod ID yang dibuang supaya ia tidak dimasukkan semula oleh cloud
-    this.deletedAppIds.push(this.applications[index].id);
-    this.applications.splice(index, 1);
-    this.triggerSave();
-},
+                },
+                buangPermohonan(index) {
+                    this.deletedAppIds.push(this.applications[index].id);
+                    this.applications.splice(index, 1);
+                    this.triggerSave();
+                },
                 tambahPegawai() {
                     if (this.pegawaiBaru.trim() !== '') {
                         this.senaraiPegawai.push({
                             nama: this.pegawaiBaru,
                             shortName: this.pegawaiBaru,
-                            status: 'Hadir'
+                            status: 'Hadir',
+                            pangkat: ''
                         });
                         this.pegawaiBaru = '';
                     }
                 },
                 addApplication() {
-                    // 1. Wajibkan isi Nama Premis
-    				if (!this.form.nama || this.form.nama.trim() === '') {
-        				return alert('Sila masukkan Nama Premis.');
-    				}
-    
-    				// 2. Wajibkan isi No. Fail (FIX IS HERE)
-    				if (!this.form.noFail || this.form.noFail.trim() === '') {
-        				return alert('Sila masukkan No. Fail.');
-    				}
+                    if (!this.form.nama || this.form.nama.trim() === '') {
+                        return alert('Sila masukkan Nama Premis.');
+                    }
+                    if (!this.form.noFail || this.form.noFail.trim() === '') {
+                        return alert('Sila masukkan No. Fail.');
+                    }
                     this.applications.push({
                         id: Date.now(),
                         ...this.form,
                         borang: this.form.kategori === 'Hal-hal Lain' ? null : this.form.borang,
-                        // Meeting state defaults
                         statusBPKj: 'Dimajukan untuk semakan',
                         statusDokumen: 'Lengkap',
                         statusTenaga: 'Mematuhi',
@@ -1110,8 +1053,6 @@ buangPermohonan(index) {
                         keputusanTeks: '',
                         manualKeputusanEdit: false
                     });
-
-                    // Reset form slightly
                     this.form.nama = '';
                     this.form.butiran = '';
                     this.form.noFail = '';
@@ -1125,57 +1066,70 @@ buangPermohonan(index) {
                 printPage() {
                     window.print();
                 },
-	exportWord(elementId, filename = '') {
-        const el = document.getElementById(elementId);
-        if(!el) return;
+                exportWord(elementId, filename = '') {
+                    const el = document.getElementById(elementId);
+                    if(!el) return;
 
-        // Struktur XML moden untuk OpenXML Word
-        const preHtml = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-        <head><meta charset='utf-8'><title>Export HTML To Doc</title>
-        <style>
-            .doc-table { border-collapse: collapse; width: 100%; margin-bottom: 20px; border: 1px solid black; }
-            .doc-table th, .doc-table td { border: 1px solid black; padding: 5px; vertical-align: top; text-align: left; }
-            table.no-border { border-collapse: collapse; width: 100%; border: none !important; }
-            table.no-border td, table.no-border th { border: none !important; padding: 5px; vertical-align: top; text-align: left; }
-        </style>
-        </head><body style="font-family: Arial, sans-serif; font-size: 9pt;">`;
-        
-        const postHtml = "</body></html>";
-        const clone = el.cloneNode(true);
-        
-        const allElements = clone.querySelectorAll('*');
-        allElements.forEach(element => {
-            element.style.fontFamily = 'Arial, sans-serif';
-            if (element.tagName === 'H3') {
-                element.style.fontSize = '11pt';
-            } else if (!element.style.fontSize) {
-                element.style.fontSize = '9pt';
+                    // Gunakan struktur XML Word yang betul supaya tidak dianggap 'corrupted' dan dibuka terus dalam Print Layout
+                    const preHtml = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+                    <head>
+                    <meta charset='utf-8'>
+                    <title>Export HTML To Doc</title>
+                    <!--[if gte mso 9]>
+                    <xml>
+                        <w:WordDocument>
+                            <w:View>Print</w:View>
+                            <w:Zoom>100</w:Zoom>
+                            <w:DoNotOptimizeForBrowser/>
+                        </w:WordDocument>
+                    </xml>
+                    <![endif]-->
+                    <style>
+                        .doc-table { border-collapse: collapse; width: 100%; margin-bottom: 20px; border: 1px solid black; }
+                        .doc-table th, .doc-table td { border: 1px solid black; padding: 5px; vertical-align: top; text-align: left; }
+                        table.no-border { border-collapse: collapse; width: 100%; border: none !important; }
+                        table.no-border td, table.no-border th { border: none !important; padding: 5px; vertical-align: top; text-align: left; }
+                    </style>
+                    </head><body style="font-family: Arial, sans-serif; font-size: 9pt;">`;
+                    
+                    const postHtml = "</body></html>";
+                    const clone = el.cloneNode(true);
+                    
+                    const allElements = clone.querySelectorAll('*');
+                    allElements.forEach(element => {
+                        element.style.fontFamily = 'Arial, sans-serif';
+                        if (element.tagName === 'H3') {
+                            element.style.fontSize = '9pt';
+                        } else if (!element.style.fontSize) {
+                            element.style.fontSize = '9pt';
+                        }
+                    });
+                    
+                    const html = preHtml + clone.innerHTML + postHtml;
+                    
+                    // PENTING: Gunakan application/msword dan .doc supaya MS Word tidak menganggap fail ini rosak (corrupted)
+                    const blob = new Blob(['\ufeff', html], { 
+                        type: 'application/msword;charset=utf-8' 
+                    });
+                    
+                    // Pastikan sambungan fail adalah .doc (bukan .docx kerana .docx memerlukan arkib ZIP sebenar)
+                    filename = filename ? filename.replace('.docx', '.doc') : 'document.doc';
+                    if (!filename.endsWith('.doc')) filename += '.doc';
+                    
+                    const downloadLink = document.createElement("a");
+                    document.body.appendChild(downloadLink);
+                    
+                    const url = URL.createObjectURL(blob);
+                    downloadLink.href = url;
+                    downloadLink.download = filename;
+                    downloadLink.click();
+                    
+                    setTimeout(() => {
+                        document.body.removeChild(downloadLink);
+                        URL.revokeObjectURL(url);
+                    }, 100);
+                }
             }
-        });
-        
-        const html = preHtml + clone.innerHTML + postHtml;
-        
-        // 1. TUKAR MIME TYPE KEPADA OPENXML MODEN
-        const blob = new Blob(['\ufeff', html], { 
-            type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' 
-        });
-        
-        filename = filename ? filename.replace('.doc', '.docx') : 'document.docx';
-        
-        const downloadLink = document.createElement("a");
-        document.body.appendChild(downloadLink);
-        
-        const url = URL.createObjectURL(blob);
-        downloadLink.href = url;
-        downloadLink.download = filename;
-        downloadLink.click();
-        
-        setTimeout(() => {
-            document.body.removeChild(downloadLink);
-            URL.revokeObjectURL(url);
-        }, 100);
-    }
-}
         }).mount('#app');
     </script>
 </body>

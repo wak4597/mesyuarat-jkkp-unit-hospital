@@ -33,6 +33,7 @@
             content: "(" counter(alpha-counter, lower-alpha) ")";
             position: absolute;
             left: 0;
+            font-style: italic;
         }
         
         @media print {
@@ -559,7 +560,7 @@
                                                     <p style="margin-bottom: 8px; margin-top: 0;" v-if="app.noFail">({{ app.noFail }})</p>
                                                     
                                                     <p style="margin-top: 8px; margin-bottom: 4px;">Mesyuarat dimaklumkan:</p>
-                                                    <ol class="paren-alpha" style="margin-left: 10px; margin-bottom: 6px; padding-left: 0;">
+                                                    <ol class="paren-alpha" style="margin-left: 0px; margin-bottom: 0px; padding-left: 0;">
                                                         <li v-html="formatItalicLive(`Terima ${app.kategori === 'Berbangkit' ? 'maklum balas' : 'permohonan'} daripada pihak premis pada ${app.tarikhTerima}.`)"></li>
                                                         <li>Pelan lantai yang dikemukakan mengikut skala 1:100.</li>
                                                         <li>Pelan mekanikal & elektrikal (M&E) {{ app.statusBPKj.toLowerCase() }}.</li>
@@ -1191,6 +1192,7 @@
             tdLabel.style.verticalAlign = 'top';
             tdLabel.style.border = 'none';
             tdLabel.style.padding = '2px 0';
+            tdLabel.style.fontStyle = 'italic';
             tdLabel.textContent = `(${letter})`;
 
             const tdContent = document.createElement('td');

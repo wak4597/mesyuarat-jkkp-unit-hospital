@@ -249,13 +249,13 @@
                         <div v-for="kategori in ['Berbangkit', 'Baru', 'Hal-hal Lain']" :key="kategori">
                             <template v-if="hasItemsKategori(kategori)">
                                 <!-- Kategori Header -->
-                                <h3 class="font-bold text-md uppercase mt-6 mb-2" v-if="kategori === 'Berbangkit'">PERKARA-PERKARA BERBANGKIT</h3>
-                                <h3 class="font-bold text-md uppercase mt-6 mb-2" v-if="kategori === 'Baru'">PEMBENTANGAN PERMOHONAN BARU</h3>
-                                <h3 class="font-bold text-md uppercase mt-6 mb-2" v-if="kategori === 'Hal-hal Lain'">HAL-HAL LAIN</h3>
+                                <h3 style="font-weight: bold; text-transform: uppercase; margin-top: 24px; margin-bottom: 12px; border-bottom: 1.5px solid #000; padding-bottom: 4px; width: 100%;" class="font-bold text-md uppercase mt-6 mb-3 border-b-2 border-black pb-1 w-full" v-if="kategori === 'Berbangkit'">PEMBENTANGAN PERKARA-PERKARA BERBANGKIT</h3>
+                                <h3 style="font-weight: bold; text-transform: uppercase; margin-top: 24px; margin-bottom: 12px; border-bottom: 1.5px solid #000; padding-bottom: 4px; width: 100%;" class="font-bold text-md uppercase mt-6 mb-3 border-b-2 border-black pb-1 w-full" v-if="kategori === 'Baru'">PEMBENTANGAN PERMOHONAN BARU</h3>
+                                <h3 style="font-weight: bold; text-transform: uppercase; margin-top: 24px; margin-bottom: 12px; border-bottom: 1.5px solid #000; padding-bottom: 4px; width: 100%;" class="font-bold text-md uppercase mt-6 mb-3 border-b-2 border-black pb-1 w-full" v-if="kategori === 'Hal-hal Lain'">HAL-HAL LAIN</h3>
 
                                 <!-- Borang 1 -->
                                 <div v-if="kategori !== 'Hal-hal Lain' && getFilteredApps(kategori, 'Borang 1').length > 0">
-                                    <p class="font-bold text-sm uppercase mb-2">PERMOHONAN KELULUSAN UNTUK MENUBUHKAN ATAU MENYENGGARAKAN (BORANG 1)</p>
+                                    <p style="font-weight: bold; text-transform: uppercase; margin-bottom: 8px;" class="font-bold text-sm uppercase mb-2">&bull;&nbsp;&nbsp;PERMOHONAN KELULUSAN UNTUK MENUBUHKAN ATAU MENYENGGARAKAN (BORANG 1)</p>
                                     <table class="doc-table">
                                         <thead>
                                             <tr>
@@ -280,7 +280,7 @@
 
                                 <!-- Borang 5 -->
                                 <div v-if="kategori !== 'Hal-hal Lain' && getFilteredApps(kategori, 'Borang 5').length > 0">
-                                    <p class="font-bold text-sm uppercase mb-2">PERMOHONAN BAGI PELUASAN ATAU PENGUBAHAN (BORANG 5)</p>
+                                    <p style="font-weight: bold; text-transform: uppercase; margin-bottom: 8px;" class="font-bold text-sm uppercase mb-2">&bull;&nbsp;&nbsp;PERMOHONAN BAGI PELUASAN ATAU PENGUBAHAN (BORANG 5)</p>
                                     <table class="doc-table">
                                         <thead>
                                             <tr>
@@ -305,7 +305,7 @@
 
                                 <!-- Brownfield -->
                                 <div v-if="kategori !== 'Hal-hal Lain' && getFilteredApps(kategori, 'Brownfield').length > 0">
-                                    <p class="font-bold text-sm uppercase mb-2">PERMOHONAN BAGI CADANGAN HOSPITAL SWASTA (BROWNFIELD)</p>
+                                    <p style="font-weight: bold; text-transform: uppercase; margin-bottom: 8px;" class="font-bold text-sm uppercase mb-2">&bull;&nbsp;&nbsp;PERMOHONAN BAGI CADANGAN HOSPITAL SWASTA (BROWNFIELD)</p>
                                     <table class="doc-table">
                                         <thead>
                                             <tr>

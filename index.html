@@ -18,6 +18,22 @@
         .doc-table { width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; }
         .doc-table th, .doc-table td { border: 1px solid #000; padding: 8px; vertical-align: top; text-align: left; font-size: 9pt; }
         .doc-table th { font-weight: bold; }
+
+        .paren-alpha {
+            list-style: none;
+            counter-reset: alpha-counter;
+        }
+        .paren-alpha > li {
+            counter-increment: alpha-counter;
+            position: relative;
+            padding-left: 28px;
+            margin-bottom: 4px;
+        }
+        .paren-alpha > li::before {
+            content: "(" counter(alpha-counter, lower-alpha) ")";
+            position: absolute;
+            left: 0;
+        }
         
         @media print {
             body { background-color: white; }
@@ -542,13 +558,14 @@
                                                     <p style="font-weight: bold; margin: 0;">{{ app.nama }}</p>
                                                     <p style="margin-bottom: 8px; margin-top: 0;" v-if="app.noFail">({{ app.noFail }})</p>
                                                     
-                                                    <p style="text-decoration: underline; margin-top: 8px; margin-bottom: 4px;">Mesyuarat dimaklumkan:</p>
+                                                    <p style="margin-top: 8px; margin-bottom: 4px;">Mesyuarat dimaklumkan:</p>
                                                     <ol class="paren-alpha" style="margin-left: 20px; margin-bottom: 12px; padding-left: 0;">
-                                                    <li v-html="formatItalicLive(`Terima ${app.kategori === 'Berbangkit' ? 'maklum balas' : 'permohonan'} daripada pihak premis pada ${app.tarikhTerima}.`)"></li>
+                                                        <li v-html="formatItalicLive(`Terima ${app.kategori === 'Berbangkit' ? 'maklum balas' : 'permohonan'} daripada pihak premis pada ${app.tarikhTerima}.`)"></li>
                                                         <li>Pelan lantai yang dikemukakan mengikut skala 1:100.</li>
                                                         <li>Pelan mekanikal & elektrikal (M&E) {{ app.statusBPKj.toLowerCase() }}.</li>
                                                         <li>Dokumen sokongan {{ app.statusDokumen.toLowerCase() }}.</li>
                                                         <li>Cadangan tenaga kerja {{ app.statusTenaga.toLowerCase() }}.</li>
+                                                        <li>
                                                             <span v-if="app.statusLantai === 'Mematuhi'">Pelan lantai arkitek mematuhi.</span>
                                                             <span v-if="app.statusLantai === 'Ketidakpatuhan Minor'">Terdapat ketidakpatuhan minor yang memerlukan maklum balas daripada pihak premis.</span>
                                                             <span v-if="app.statusLantai === 'Ketidakpatuhan (Rujuk Lampiran A)'">Ketidakpatuhan pada pelan lantai arkitek boleh dirujuk pada Lampiran A surat berkaitan.</span>
@@ -557,7 +574,7 @@
                                                     
                                                     <p style="margin-top: 12px; margin-bottom: 0;" v-html="formatItalicLive(app.keputusanTeks || 'Mesyuarat belum membuat keputusan.')"></p>
                                                     
-                                                    <p style="margin-top: 12px; font-weight: bold; text-align: right;">Tindakan: {{ app.pegawai }}</p>
+                                                    <p ="margin-top: 12px; font-weight: bold; text-align: right;">Tindakan: {{ app.pegawai }}</p>
                                                 </td>
                                             </tr>
                                         </tbody>
@@ -567,32 +584,32 @@
                         </div>
 
                         <!-- Penutup -->
-                        <div class="contenteditable-field" contenteditable="true" style="margin-top: 32px; padding-top: 32px;">
-                            <p style="font-weight: bold; text-transform: uppercase;">PENUTUP</p>
+                        <div class="contenteditable-field" contenteditable="true" ="margin-top: 32px; padding-top: 32px;">
+                            <p ="font-weight: bold; text-transform: uppercase;">PENUTUP</p>
                             <p>Mesyuarat ditangguhkan pada pukul 3.30 petang dan tarikh mesyuarat seterusnya akan dimaklumkan kelak.</p>
                         </div>
 
                         <!-- Tandatangan -->
-                        <table class="no-border" style="width: 100%; margin-top: 60px;">
+                        <table class="no-border" ="width: 100%; margin-top: 60px;">
                             <tr>
-                                <td style="width: 50%; vertical-align: top;">
-                                    <p style="margin-bottom: 60px;">Disediakan oleh:</p>
-                                    <p style="border-top: 1px solid black; padding-top: 8px; font-weight: bold; text-transform: uppercase; display: inline-block; width: 85%;">
+                                <td ="width: 50%; vertical-align: top;">
+                                    <p ="margin-bottom: 60px;">Disediakan oleh:</p>
+                                    <p ="border-top: 1px solid black; padding-top: 8px; font-weight: bold; text-transform: uppercase; display: inline-block; width: 85%;">
                                         {{ butiran.pencatat ? '(' + butiran.pencatat.toUpperCase() + ')' : '(NAMA PENCATAT)' }}
                                     </p>
-                                    <p style="line-height: 1.2;">
+                                    <p ="line-height: 1.2;">
                                         Ketua Penolong Pengarah Kanan UD14<br>
                                         Caw. Kawalan Amalan Perubatan Swasta<br>
                                         Bahagian Amalan Perubatan<br>
                                         Kementerian Kesihatan Malaysia
                                     </p>
                                 </td>
-                                <td style="width: 50%; vertical-align: top;">
-                                    <p style="margin-bottom: 60px;">Disahkan oleh:</p>
-                                    <p style="border-top: 1px solid black; padding-top: 8px; font-weight: bold; text-transform: uppercase; display: inline-block; width: 85%;">
+                                <td ="width: 50%; vertical-align: top;">
+                                    <p ="margin-bottom: 60px;">Disahkan oleh:</p>
+                                    <p ="border-top: 1px solid black; padding-top: 8px; font-weight: bold; text-transform: uppercase; display: inline-block; width: 85%;">
                                         {{ butiran.pengerusi ? '(' + butiran.pengerusi.toUpperCase() + ')' : '(NAMA PENGERUSI)' }}
                                     </p>
-                                    <p style="line-height: 1.2;">
+                                    <p ="line-height: 1.2;">
                                         Ketua Penolong Pengarah Kanan UD14<br>
                                         Caw. Kawalan Amalan Perubatan Swasta<br>
                                         Bahagian Amalan Perubatan<br>
@@ -1136,51 +1153,90 @@
                     window.print();
                 },
                 exportWord(elementId, filename = '') {
-                    const el = document.getElementById(elementId);
-                    if(!el) return;
+    const el = document.getElementById(elementId);
+    if(!el) return;
 
-                    const preHtml = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-                    <head><meta charset='utf-8'><title>Export HTML To Doc</title>
-                    <style>
-                        .doc-table { border-collapse: collapse; width: 100%; margin-bottom: 20px; border: 1px solid black; }
-                        .doc-table th, .doc-table td { border: 1px solid black; padding: 5px; vertical-align: top; text-align: left; }
-                        table.no-border { border-collapse: collapse; width: 100%; border: none !important; }
-                        table.no-border td, table.no-border th { border: none !important; padding: 5px; vertical-align: top; text-align: left; }
-                    </style>
-                    </head><body style="font-family: Arial, sans-serif; font-size: 9pt;">`;
-                    
-                    const postHtml = "</body></html>";
-                    const clone = el.cloneNode(true);
-                    
-                    const allElements = clone.querySelectorAll('*');
-                    allElements.forEach(element => {
-                        element.style.fontFamily = 'Arial, sans-serif';
-                        if (element.tagName === 'H3') {
-                            element.style.fontSize = '11pt';
-                        } else if (!element.style.fontSize) {
-                            element.style.fontSize = '9pt';
-                        }
-                    });
-                    
-                    const html = preHtml + clone.innerHTML + postHtml;
-                    const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
-                    
-                    const url = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(html);
-                    filename = filename ? filename : 'document.doc';
-                    
-                    const downloadLink = document.createElement("a");
-                    document.body.appendChild(downloadLink);
-                    
-                    if(navigator.msSaveOrOpenBlob ){
-                        navigator.msSaveOrOpenBlob(blob, filename);
-                    } else {
-                        downloadLink.href = url;
-                        downloadLink.download = filename;
-                        downloadLink.click();
-                    }
-                    document.body.removeChild(downloadLink);
-                }
-            }
+    const preHtml = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+    <head><meta charset='utf-8'><title>Export HTML To Doc</title>
+    <style>
+        .doc-table { border-collapse: collapse; width: 100%; margin-bottom: 20px; border: 1px solid black; }
+        .doc-table th, .doc-table td { border: 1px solid black; padding: 5px; vertical-align: top; text-align: left; }
+        table.no-border { border-collapse: collapse; width: 100%; border: none !important; }
+        table.no-border td, table.no-border th { border: none !important; padding: 2px 4px; vertical-align: top; text-align: left; }
+    </style>
+    </head><body style="font-family: Arial, sans-serif; font-size: 9pt;">`;
+    
+    const postHtml = "</body></html>";
+    const clone = el.cloneNode(true);
+
+    // Tukar <ol class="paren-alpha"> kepada jadual tanpa garisan supaya (a), (b), (c) kemas dalam MS Word
+    const alphaLists = clone.querySelectorAll('ol.paren-alpha');
+    alphaLists.forEach(ol => {
+        const table = document.createElement('table');
+        table.className = 'no-border';
+        table.style.width = '100%';
+        table.style.marginLeft = '15px';
+        table.style.marginBottom = '10px';
+        table.style.borderCollapse = 'collapse';
+
+        const tbody = document.createElement('tbody');
+        const items = ol.querySelectorAll('li');
+
+        items.forEach((li, index) => {
+            const letter = String.fromCharCode(97 + index); // 97 = 'a', 98 = 'b', dst.
+            const tr = document.createElement('tr');
+
+            const tdLabel = document.createElement('td');
+            tdLabel.style.width = '28px';
+            tdLabel.style.verticalAlign = 'top';
+            tdLabel.style.border = 'none';
+            tdLabel.style.padding = '2px 0';
+            tdLabel.textContent = `(${letter})`;
+
+            const tdContent = document.createElement('td');
+            tdContent.style.verticalAlign = 'top';
+            tdContent.style.border = 'none';
+            tdContent.style.padding = '2px 0';
+            tdContent.innerHTML = li.innerHTML;
+
+            tr.appendChild(tdLabel);
+            tr.appendChild(tdContent);
+            tbody.appendChild(tr);
+        });
+
+        table.appendChild(tbody);
+        ol.parentNode.replaceChild(table, ol);
+    });
+    
+    const allElements = clone.querySelectorAll('*');
+    allElements.forEach(element => {
+        element.style.fontFamily = 'Arial, sans-serif';
+        if (element.tagName === 'H3') {
+            element.style.fontSize = '11pt';
+        } else if (!element.style.fontSize) {
+            element.style.fontSize = '9pt';
+        }
+    });
+    
+    const html = preHtml + clone.innerHTML + postHtml;
+    const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
+    
+    const url = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(html);
+    filename = filename ? filename : 'document.doc';
+    
+    const downloadLink = document.createElement("a");
+    document.body.appendChild(downloadLink);
+    
+    if (navigator.msSaveOrOpenBlob) {
+        navigator.msSaveOrOpenBlob(blob, filename);
+    } else {
+        downloadLink.href = url;
+        downloadLink.download = filename;
+        downloadLink.click();
+    }
+    document.body.removeChild(downloadLink);
+}
+}
         }).mount('#app');
     </script>
 </body>

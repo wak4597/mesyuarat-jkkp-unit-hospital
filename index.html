@@ -542,21 +542,20 @@
                                                     <p style="font-weight: bold; margin: 0;">{{ app.nama }}</p>
                                                     <p style="margin-bottom: 8px; margin-top: 0;" v-if="app.noFail">({{ app.noFail }})</p>
                                                     
-                                                    <p style="text-decoration: underline; font-weight: bold; margin-top: 8px; margin-bottom: 4px;">Mesyuarat dimaklumkan:</p>
-                                                    <ul style="margin-left: 20px; margin-bottom: 12px; padding-left: 0;">
-                                                        <li v-html="formatItalicLive(`Terima ${app.kategori === 'Berbangkit' ? 'maklum balas' : 'permohonan'} daripada pihak premis pada ${app.tarikhTerima}.`)"></li>
+                                                    <p style="text-decoration: underline; margin-top: 8px; margin-bottom: 4px;">Mesyuarat dimaklumkan:</p>
+                                                    <ol class="paren-alpha" style="margin-left: 20px; margin-bottom: 12px; padding-left: 0;">
+                                                    <li v-html="formatItalicLive(`Terima ${app.kategori === 'Berbangkit' ? 'maklum balas' : 'permohonan'} daripada pihak premis pada ${app.tarikhTerima}.`)"></li>
                                                         <li>Pelan lantai yang dikemukakan mengikut skala 1:100.</li>
                                                         <li>Pelan mekanikal & elektrikal (M&E) {{ app.statusBPKj.toLowerCase() }}.</li>
                                                         <li>Dokumen sokongan {{ app.statusDokumen.toLowerCase() }}.</li>
                                                         <li>Cadangan tenaga kerja {{ app.statusTenaga.toLowerCase() }}.</li>
-                                                        <li>
                                                             <span v-if="app.statusLantai === 'Mematuhi'">Pelan lantai arkitek mematuhi.</span>
                                                             <span v-if="app.statusLantai === 'Ketidakpatuhan Minor'">Terdapat ketidakpatuhan minor yang memerlukan maklum balas daripada pihak premis.</span>
                                                             <span v-if="app.statusLantai === 'Ketidakpatuhan (Rujuk Lampiran A)'">Ketidakpatuhan pada pelan lantai arkitek boleh dirujuk pada Lampiran A surat berkaitan.</span>
                                                         </li>
-                                                    </ul>
+                                                    </ol>
                                                     
-                                                    <p style="font-weight: bold; margin-top: 12px; margin-bottom: 0;" v-html="formatItalicLive(app.keputusanTeks || 'Mesyuarat belum membuat keputusan.')"></p>
+                                                    <p style="margin-top: 12px; margin-bottom: 0;" v-html="formatItalicLive(app.keputusanTeks || 'Mesyuarat belum membuat keputusan.')"></p>
                                                     
                                                     <p style="margin-top: 12px; font-weight: bold; text-align: right;">Tindakan: {{ app.pegawai }}</p>
                                                 </td>

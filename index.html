@@ -192,8 +192,11 @@
                                 <textarea v-model="form.butiran" rows="2" class="w-full border border-gray-300 rounded-md p-2"></textarea>
                             </div>
                         </div>
-                        <div class="flex justify-end">
-                            <button @click="addApplication" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium">Tambah Senarai</button>
+                        <div class="flex justify-end gap-2">
+                            <button v-if="editAppId" @click="batalKemaskini" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-md font-medium">Batal</button>
+                            <button @click="addApplication" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium">
+                                {{ editAppId ? 'Kemaskini Permohonan' : 'Tambah Senarai' }}
+                            </button>
                         </div>
                     </div>
 
@@ -215,8 +218,9 @@
                                     <td class="px-4 py-3 text-sm font-medium">{{ app.nama }}</td>
                                     <td class="px-4 py-3 text-sm text-gray-600 truncate max-w-xs" v-html="formatItalicLive(app.butiran)"></td>
                                     <td class="px-4 py-3 text-sm">{{ app.pegawai }}</td>
-                                    <td class="px-4 py-3 text-right text-sm">
-                                        <button v-if="userRole === 'urusetia' || app.pegawai === currentUser.shortName" @click="buangPermohonan(index)" class="text-red-600 hover:text-red-900">Buang</button>
+                                    <td class="px-4 py-3 text-right text-sm space-x-3">
+                                        <button v-if="userRole === 'urusetia' || app.pegawai === currentUser.shortName" @click="editPermohonan(app)" class="text-blue-600 hover:text-blue-900 font-medium">Kemaskini</button>
+                                        <button v-if="userRole === 'urusetia' || app.pegawai === currentUser.shortName" @click="buangPermohonan(index)" class="text-red-600 hover:text-red-900 font-medium">Buang</button>
                                     </td>
                                 </tr>
                                 <tr v-if="applications.length === 0">
@@ -692,6 +696,7 @@
                     },
                     senaraiPegawai: [], // LIST KINI KOSONG DAN SELAMAT
                     pegawaiBaru: '',
+                    editAppId: null,
                     form: {
                         kategori: 'Berbangkit',
                         borang: 'Borang 5',
@@ -1053,6 +1058,26 @@
                         this.pegawaiBaru = '';
                     }
                 },
+                editPermohonan(app) {
+                    this.editAppId = app.id;
+                    this.form = {
+                        kategori: app.kategori,
+                        borang: app.borang || 'Borang 5',
+                        tarikhTerima: app.tarikhTerima,
+                        nama: app.nama,
+                        noFail: app.noFail,
+                        butiran: app.butiran,
+                        pegawai: app.pegawai
+                    };
+                    // Bawa pengguna kembali ke form di atas
+                    window.scrollTo({ top: 0, behavior: 'smooth' }); 
+                },
+                batalKemaskini() {
+                    this.editAppId = null;
+                    this.form.nama = '';
+                    this.form.butiran = '';
+                    this.form.noFail = '';
+                },
                 addApplication() {
                     if (!this.form.nama || this.form.nama.trim() === '') {
                         return alert('Sila masukkan Nama Premis.');
@@ -1061,23 +1086,47 @@
                         return alert('Sila masukkan No. Fail.');
                     }
                     
-                    this.applications.push({
-                        id: Date.now(),
-                        ...this.form,
-                        borang: this.form.kategori === 'Hal-hal Lain' ? null : this.form.borang,
-                        statusBPKj: 'Dimajukan untuk semakan',
-                        statusDokumen: 'Lengkap',
-                        statusTenaga: 'Mematuhi',
-                        statusLantai: 'Mematuhi',
-                        keputusan: '',
-                        keputusanTeks: '',
-                        manualKeputusanEdit: false
-                    });
+                    if (this.editAppId) {
+                        // KEMASKINI REKOD SEDIA ADA
+                        const index = this.applications.findIndex(a => a.id === this.editAppId);
+                        if (index !== -1) {
+                            this.applications[index] = {
+                                ...this.applications[index], // Kekalkan status M&E, pelan, keputusan sedia ada
+                                kategori: this.form.kategori,
+                                borang: this.form.kategori === 'Hal-hal Lain' ? null : this.form.borang,
+                                tarikhTerima: this.form.tarikhTerima,
+                                nama: this.form.nama,
+                                noFail: this.form.noFail,
+                                butiran: this.form.butiran,
+                                pegawai: this.form.pegawai
+                            };
+                        }
+                        this.editAppId = null; // Keluar dari mod kemaskini
+                    } else {
+                        // TAMBAH REKOD BARU (seperti biasa)
+                        this.applications.push({
+                            id: Date.now(),
+                            ...this.form,
+                            borang: this.form.kategori === 'Hal-hal Lain' ? null : this.form.borang,
+                            statusBPKj: 'Dimajukan untuk semakan',
+                            statusDokumen: 'Lengkap',
+                            statusTenaga: 'Mematuhi',
+                            statusLantai: 'Mematuhi',
+                            keputusan: '',
+                            keputusanTeks: '',
+                            manualKeputusanEdit: false
+                        });
+                    }
 
+                    // Reset form
                     this.form.nama = '';
                     this.form.butiran = '';
                     this.form.noFail = '';
+                    
+                    // Arahkan awan supaya menyimpan data baru
+                    this.triggerSave();
                 },
+                
                 hasItemsKategori(kategori) {
                     return this.applications.some(a => a.kategori === kategori);
                 },

@@ -683,22 +683,7 @@ createApp({
                         pengerusi: 'Dr. Alicia Liew Hsiao Hui',
                         pencatat: ''
                     },
-                    senaraiPegawai: [
-                        { nama: 'Dr. Alicia Liew Hsiao Hui', shortName: 'Dr. Alicia', status: 'Hadir', pangkat: 'Ketua Penolong Pengarah Kanan' },
-                        { nama: 'Dr. Nurul ‘Ain binti Selamat @ Keliwon', shortName: 'Dr. Nurul ‘Ain', status: 'Hadir', pangkat: 'Ketua Penolong Pengarah Kanan' },
-                        { nama: 'Dr. Mohd Zulfahmi bin Amali', shortName: 'Dr. Zulfahmi', status: 'Hadir', pangkat: 'Ketua Penolong Pengarah Kanan' },
-                        { nama: 'Dr. Nurzaimah binti Amir Abdullah', shortName: 'Dr. Nurzaimah', status: 'Hadir', pangkat: 'Ketua Penolong Pengarah Kanan' },
-                        { nama: 'Dr. Azrin bin Samsudin', shortName: 'Dr. Azrin', status: 'Hadir', pangkat: 'Ketua Penolong Pengarah Kanan' },
-                        { nama: 'Dr. Adibah Hanim binti Mohd. Zulkefli', shortName: 'Dr. Adibah', status: 'Hadir', pangkat: 'Ketua Penolong Pengarah Kanan' },
-                        { nama: 'Dr. Nurazwani binti Robaai', shortName: 'Dr. Nurazwani', status: 'Urusetia', pangkat: 'Ketua Penolong Pengarah Kanan' },
-                        { nama: 'Dr. Quah Yen Yee', shortName: 'Dr. Quah', status: 'Hadir', pangkat: 'Ketua Penolong Pengarah Kanan' },
-                        { nama: 'Dr. Goh Vern Zhi Denise ', shortName: 'Dr. Denise', status: 'Hadir', pangkat: 'Ketua Penolong Pengarah Kanan' },
-                        { nama: 'Dr. Syazwini binti Ahmad@Ahmad Sowi', shortName: 'Dr. Syazwini', status: 'Hadir', pangkat: 'Ketua Penolong Pengarah Kanan' }, 
-                        { nama: 'Dr. Nur Liyana binti Hanapi', shortName: 'Dr. Liyana', status: 'Hadir', pangkat: 'Ketua Penolong Pengarah' },
-                        { nama: 'Dr. Hapizi bin Mohd Yunus', shortName: 'Dr. Hapizi', status: 'Urusetia', pangkat: 'Ketua Penolong Pengarah' },
-                        { nama: 'Dr. Muhamad Aliff Adha bin Ali', shortName: 'Dr. Aliff', status: 'Urusetia', pangkat: 'Ketua Penolong Pengarah' },            
-                        { nama: 'Dr. Nurain binti Zainuddin', shortName: 'Dr. Nurain', status: 'Hadir',pangkat: 'Penolong Pengarah' },              
-                    ],
+                    senaraiPegawai: [],
                     pegawaiBaru: '',
                     form: {
                         kategori: 'Berbangkit',
@@ -835,24 +820,6 @@ createApp({
 
                     // Listen ke Firestore (Real-time updates)
                     const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'meetings', this.meetingId);
-                    
-                    // Rujukan pangkat lalai untuk baiki data lama dari Firebase
-                    const rujukanPangkat = [
-                        { nama: 'Dr. Alicia Liew Hsiao Hui', pangkat: 'Ketua Penolong Pengarah Kanan' },
-                        { nama: 'Dr. Nurul ‘Ain binti Selamat @ Keliwon', pangkat: 'Ketua Penolong Pengarah Kanan' },
-                        { nama: 'Dr. Mohd Zulfahmi bin Amali', pangkat: 'Ketua Penolong Pengarah Kanan' },
-                        { nama: 'Dr. Nurzaimah binti Amir Abdullah', pangkat: 'Ketua Penolong Pengarah Kanan' },
-                        { nama: 'Dr. Azrin bin Samsudin', pangkat: 'Ketua Penolong Pengarah Kanan' },
-                        { nama: 'Dr. Adibah Hanim binti Mohd. Zulkefli', pangkat: 'Ketua Penolong Pengarah Kanan' },
-                        { nama: 'Dr. Nurazwani binti Robaai', pangkat: 'Ketua Penolong Pengarah Kanan' },
-                        { nama: 'Dr. Quah Yen Yee', pangkat: 'Ketua Penolong Pengarah Kanan' },
-                        { nama: 'Dr. Goh Vern Zhi Denise ', pangkat: 'Ketua Penolong Pengarah Kanan' },
-                        { nama: 'Dr. Syazwini binti Ahmad@Ahmad Sowi', pangkat: 'Ketua Penolong Pengarah Kanan' }, 
-                        { nama: 'Dr. Nur Liyana binti Hanapi', pangkat: 'Ketua Penolong Pengarah' },
-                        { nama: 'Dr. Hapizi bin Mohd Yunus', pangkat: 'Ketua Penolong Pengarah' },
-                        { nama: 'Dr. Muhamad Aliff Adha bin Ali', pangkat: 'Ketua Penolong Pengarah' },            
-                        { nama: 'Dr. Nurain binti Zainuddin', pangkat: 'Penolong Pengarah' }
-                    ];
 
                     onSnapshot(docRef, (snap) => {
                         if (snap.exists()) {
@@ -862,16 +829,9 @@ createApp({
                             if (this.isInitialDataLoad || this.userRole !== 'urusetia') {
                                 if(data.butiran) this.butiran = data.butiran;
                                 
-                                // PROSES GABUNGAN DATA (MENGHALANG FIREBASE PADAM PANGKAT)
                                 if(data.senaraiPegawai) {
-                                    this.senaraiPegawai = data.senaraiPegawai.map(pegawaiDb => {
-                                        if (!pegawaiDb.pangkat) {
-                                            const match = rujukanPangkat.find(r => r.nama === pegawaiDb.nama);
-                                            pegawaiDb.pangkat = match ? match.pangkat : '';
-                                        }
-                                        return pegawaiDb;
-                                    });
-                                }
+    								this.senaraiPegawai = data.senaraiPegawai;
+								}
                             }
                             
                             if(data.applications) this.applications = data.applications;                            
@@ -924,26 +884,14 @@ createApp({
         const result = await signInWithPopup(auth, provider);
         const email = result.user.email;
         
-        // MAP EMAILS TO SHORT NAMES DIRECTLY
-        const emailUserMap = {
-            'hapizi.yunus@moh.gov.my': 'Dr. Hapizi',
-			'drnurulain@moh.gov.my': 'Dr. Nurul ‘Ain',
-			'mohdzulfahmi@moh.gov.my': 'Dr. Zulfahmi',
-			'nurzaimah.ab@moh.gov.my': 'Dr. Nurzaimah',
-			'azrin.samsuddin@moh.gov.my': 'Dr. Azrin',
-            'adibahanim@moh.gov.my': 'Dr. Adibah',
-			'nurazwani@moh.gov.my': 'Dr. Nurazwani',
-			'quahyy@moh.gov.my': 'Dr. Quah', 
-			'denisegoh@moh.gov.my': 'Dr. Denise',
-			'syazwini@moh.gov.my': 'Dr. Syazwini',
-            'nur.liyana@moh.gov.my': 'Dr. Liyana',
-			'aliffadha@moh.gov.my': 'Dr. Aliff',
-			'nurain.zainuddin@moh.gov.my': 'Dr. Nurain',
-			'alicia_lhh@moh.gov.my': 'Dr. Alicia',
-			'wak4597@gmail.com': 'Dr. Nurain'
-        };
+       // NEW: Semak emel di dalam pangkalan data Firestore
+        const userDocRef = doc(db, 'authorized_users', email);
+        const userSnap = await window.VueFirebaseGetDoc(userDocRef);
         
-        const matchedShortName = emailUserMap[email];
+        if (userSnap.exists()) {
+            // Emel wujud dalam database, ambil shortName mereka
+            const userData = userSnap.data();
+            const matchedShortName = userData.shortName;
         
         if (matchedShortName) {
             // Find the user's full profile in senaraiPegawai
@@ -1000,6 +948,19 @@ createApp({
         this.userRole = 'urusetia';
         this.activeTab = 'butiran';
         this.showLoginModal = false;
+	// TUNGGU: Jika ini mesyuarat baru, tarik senarai pegawai dari master list
+	if (this.isNewMeeting) {
+    try {
+        const masterRef = doc(db, 'tetapan_sistem', 'master_pegawai');
+        const masterSnap = await window.VueFirebaseGetDoc(masterRef);
+        if (masterSnap.exists()) {
+            this.senaraiPegawai = masterSnap.data().senarai || [];
+            this.triggerSave(); // Simpan terus senarai ini ke dalam mesyuarat baru
+        }
+    } catch (error) {
+        console.error("Gagal menarik master_pegawai:", error);
+    }
+}
     } else {
         // SEKAT PEGAWAI JIKA BUKAN DARI LINK KONGSIAN URUSETIA ATAU TERKINI
         if (this.isNewMeeting) { 

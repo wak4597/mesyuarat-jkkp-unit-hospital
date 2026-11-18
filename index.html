@@ -1176,30 +1176,33 @@
         const table = document.createElement('table');
         table.className = 'no-border';
         table.style.width = '100%';
-        table.style.marginLeft = '15px';
-        table.style.marginBottom = '10px';
+        table.style.marginLeft = '0px'; // Removes the right-shift indent
+        table.style.marginBottom = '6px';
         table.style.borderCollapse = 'collapse';
 
         const tbody = document.createElement('tbody');
         const items = ol.querySelectorAll('li');
 
         items.forEach((li, index) => {
-            const letter = String.fromCharCode(97 + index); // 97 = 'a', 98 = 'b', dst.
+            const letter = String.fromCharCode(97 + index); 
             const tr = document.createElement('tr');
 
             const tdLabel = document.createElement('td');
-            tdLabel.style.width = '28px';
+            tdLabel.style.width = '24px'; // Tightens the gap between the letter and text
             tdLabel.style.verticalAlign = 'top';
             tdLabel.style.border = 'none';
-            tdLabel.style.padding = '2px 0';
-            tdLabel.style.fontStyle = 'italic';
-            tdLabel.textContent = `(${letter})`;
+            tdLabel.style.padding = '0'; 
+            
+            // Wraps in <p> with 0 margin to prevent Word from adding line spacing
+            tdLabel.innerHTML = `<p style="margin: 0; padding: 0; padding-bottom: 3px; line-height: 1.2; font-style: italic;">(${letter})</p>`;
 
             const tdContent = document.createElement('td');
             tdContent.style.verticalAlign = 'top';
             tdContent.style.border = 'none';
-            tdContent.style.padding = '2px 0';
-            tdContent.innerHTML = li.innerHTML;
+            tdContent.style.padding = '0'; 
+            
+            // Wraps in <p> with 0 margin to prevent Word from adding line spacing
+            tdContent.innerHTML = `<p style="margin: 0; padding: 0; padding-bottom: 3px; line-height: 1.2;">${li.innerHTML}</p>`;
 
             tr.appendChild(tdLabel);
             tr.appendChild(tdContent);

@@ -445,6 +445,7 @@
                                         <option value="Tangguh">Not Comply (Ditangguhkan / Surat Saranan)</option>
                                         <option value="KIV Premis">KIV m/b premis (Tunggu Maklum Balas Mematuhi)</option>
                                         <option value="KIV BPKj">KIV BPKj (Tunggu Ulasan Kejuruteraan Mematuhi)</option>
+                                        <option value="KIV Premis BPKj">KIV Premis & BPKj (Tunggu Maklum Balas & Ulasan Kejuruteraan Mematuhi)</option>
                                         <option value="Lain">Tiada Halangan / Lain-lain (Custom)</option>
                                     </select>
                                 </div>
@@ -584,8 +585,8 @@
                                                         <li>Cadangan tenaga kerja {{ (app.statusTenaga || 'mematuhi').toLowerCase() }}.</li>
                                                         <li>
                                                             <span v-if="app.statusLantai === 'Mematuhi'">Pelan lantai arkitek mematuhi.</span>
-                                                            <span v-if="app.statusLantai === 'Ketidakpatuhan Minor'">Terdapat ketidakpatuhan minor yang memerlukan maklum balas daripada pihak premis.</span>
-                                                            <span v-if="app.statusLantai === 'Ketidakpatuhan (Rujuk Lampiran A)'">Ketidakpatuhan pada pelan lantai arkitek boleh dirujuk pada Lampiran A surat berkaitan <span v-if="app.rujukanLampiranA">(No. Ruj.: {{ app.rujukanLampiranA }})</span>.</span>
+                                                            <span v-if="app.statusLantai === 'Ketidakpatuhan Minor'">Terdapat ketidakpatuhan minor pada pelan lantai arkitek yang memerlukan maklum balas daripada pihak premis.</span>
+                                                            <span v-if="app.statusLantai === 'Ketidakpatuhan (Rujuk Lampiran A)'">Ketidakpatuhan pada pelan lantai arkitek boleh dirujuk pada Lampiran A surat berkaitan <span v-if="app.rujukanLampiranA">no. ruj.: {{ app.rujukanLampiranA }}</span>.</span>
                                                         </li>
                                                     </ol>
                                                     
@@ -817,6 +818,8 @@
                                     app.keputusanTeks = "Mesyuarat bersetuju permohonan boleh dimajukan ke Mesyuarat Jawatankuasa Penilaian (JKP) yang akan datang untuk dipertimbangkan setelah menerima maklum balas yang mematuhi daripada pihak premis.";
                                 } else if (app.keputusan === 'KIV BPKj') {
                                     app.keputusanTeks = "Mesyuarat bersetuju permohonan boleh dimajukan ke Mesyuarat Jawatankuasa Penilaian (JKP) yang akan datang untuk dipertimbangkan setelah menerima ulasan kejuruteraan yang mematuhi daripada pihak BPKj.";
+                                } else if (app.keputusan === 'KIV Premis BPKj') {
+                                    app.keputusanTeks = "Mesyuarat bersetuju permohonan boleh dimajukan ke Mesyuarat Jawatankuasa Penilaian (JKP) yang akan datang untuk dipertimbangkan setelah menerima maklum balas daripada pihak premis dan ulasan kejuruteraan daripada pihak BPKj yang mematuhi.";
                                 }
                             }
                         });

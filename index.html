@@ -61,7 +61,7 @@
                             <button v-if="userRole === 'urusetia'" @click="activeTab = 'butiran'" :class="['px-4 py-4 text-sm tab-btn hover:bg-gray-50', activeTab === 'butiran' ? 'tab-active' : 'text-gray-500']">Butiran Mesyuarat</button>
                             <button @click="activeTab = 'daftar'" :class="['px-4 py-4 text-sm tab-btn hover:bg-gray-50', activeTab === 'daftar' ? 'tab-active' : 'text-gray-500']">Permohonan</button>
                             <button @click="activeTab = 'agenda'" :class="['px-4 py-4 text-sm tab-btn hover:bg-gray-50', activeTab === 'agenda' ? 'tab-active' : 'text-gray-500']">Senarai Premis</button>
-                            <button v-if="userRole === 'urusetia'" @click="activeTab = 'mesyuarat'" :class="['px-4 py-4 text-sm tab-btn hover:bg-gray-50', activeTab === 'mesyuarat' ? 'tab-active' : 'text-gray-500']">Keputusan Mesyuarat</button>
+                            <button @click="activeTab = 'mesyuarat'" :class="['px-4 py-4 text-sm tab-btn hover:bg-gray-50', activeTab === 'mesyuarat' ? 'tab-active' : 'text-gray-500']">Keputusan Mesyuarat</button>
                             <button v-if="userRole === 'urusetia'" @click="activeTab = 'minit'" :class="['px-4 py-4 text-sm tab-btn hover:bg-gray-50', activeTab === 'minit' ? 'tab-active' : 'text-gray-500']">Minit Mesyuarat</button>
                         </div>
                     </div>
@@ -375,7 +375,8 @@
 
                 <!-- TAB 3: SEMASA MESYUARAT -->
                 <div v-show="activeTab === 'mesyuarat'" class="max-w-5xl mx-auto space-y-6">
-                    <div v-for="app in sortedApplications" :key="app.id" class="bg-white p-5 rounded-lg border-l-4 shadow-sm" :class="app.keputusan === 'Lulus' ? 'border-green-500' : (app.keputusan === 'Tangguh' ? 'border-red-500' : (app.keputusan === 'KIV' ? 'border-yellow-500' : 'border-blue-500'))">
+                    <div v-for="app in aplikasiMesyuaratSemasa" :key="app.id" class="bg-white p-5 rounded-lg border-l-4 shadow-sm"
+                        :class="(!app.statusBPKj || !app.statusDokumen || !app.statusTenaga || !app.statusLantai || !app.keputusan) ? 'border-red-500' : 'border-green-500'">
                         <div class="flex justify-between items-start mb-4 border-b pb-2">
                             <div>
                                 <h3 class="font-bold text-lg text-gray-800">{{ app.nama }}</h3>
@@ -391,6 +392,7 @@
                             <div>
                                 <label class="text-xs text-gray-500">Status M&E (BPKj)</label>
                                 <select v-model="app.statusBPKj" class="w-full border-gray-300 rounded p-1 text-sm bg-white mt-1 border">
+                                    <option value="" disabled>-- Sila Pilih Status M&E --</option>
                                     <option value="Telah mematuhi">Telah mematuhi</option>
                                     <option value="Tidak mematuhi">Tidak mematuhi</option>
                                     <option value="Akan dimajukan">Akan dimajukan untuk semakan</option>
@@ -404,6 +406,7 @@
                             <div>
                                     <label class="text-xs text-gray-500">Dokumen Sokongan</label>
                                     <select v-model="app.statusDokumen" class="w-full border-gray-300 rounded p-1 text-sm bg-white mt-1 border">
+                                        <option value="" disabled>-- Sila Pilih Status --</option>
                                         <option value="Lengkap">Lengkap</option>
                                         <option value="Tidak Lengkap">Tidak Lengkap</option>
                                     </select>
@@ -412,6 +415,7 @@
                                     <div class="w-1/2">
                                         <label class="text-xs text-gray-500">Tenaga Kerja</label>
                                         <select v-model="app.statusTenaga" class="w-full border-gray-300 rounded p-1 text-sm bg-white mt-1 border">
+                                            <option value="" disabled>-- Sila Pilih Status --</option>
                                             <option value="Mematuhi">Mematuhi</option>
                                             <option value="Tidak Mematuhi">Tidak Mematuhi</option>
                                         </select>
@@ -420,6 +424,7 @@
                                         <label class="text-xs text-gray-500">Pelan Lantai Arkitek</label>
                                         <!-- TAMBAH @change DI SINI -->
                                         <select v-model="app.statusLantai" @change="semakLampiranA(app)" class="w-full border-gray-300 rounded p-1 text-sm bg-white mt-1 border">
+                                            <option value="" disabled>-- Sila Pilih Status Pelan Arkitek --</option>
                                             <option value="Mematuhi">Mematuhi</option>
                                             <option value="Ketidakpatuhan (Rujuk Lampiran A)">Ada Ketidakpatuhan (Lampiran A)</option>
                                             <option value="Ketidakpatuhan Minor">Ketidakpatuhan Minor</option>
@@ -452,8 +457,8 @@
                             </div>
                         </div>
                     </div>
-                    <div v-if="sortedApplications.length === 0" class="text-center py-10 bg-white rounded shadow text-gray-500">
-                        Sila daftar permohonan terlebih dahulu di Tab 1.
+                    <div v-if="aplikasiMesyuaratSemasa.length === 0" class="text-center py-10 bg-white rounded shadow text-gray-500">
+                        Tiada permohonan direkodkan di bawah senarai/nama anda.
                     </div>
                 </div>
 
@@ -714,7 +719,7 @@
                                     'Resuscitation', 'Reverse', 'Roof', 'Room', 'Rota', 'Scan', 'Scanner', 'Scope', 'Screening', 'Scrub', 'Sensory', 'Service', 'Shock', 'Shower', 'Silent', 'Simulator', 'Single', 'Sister', 'Sleep', 'Specialist', 'Speech', 
                                     'Spirometry', 'Splinting', 'Sputum', 'Staff', 'Station', 'Store', 'Stress', 'Stretcher', 'Suite', 'Supply', 'Support', 'Surgeon', 'Surgical', 'Tea', 'Technical', 'Test', 'Testing', 'Theatre', 'Therapy', 'Tissue', 'Toilet', 'Tomography', 
                                     'Tower', 'Treatment', 'Triage', 'Trolley', 'Ultrasound', 'Uptake', 'Utility', 'Vacant', 'Vascular', 'Vestibular', 'VIP', 'Visual', 'Waiting', 'Ward', 'Wash', 'Wave', 'Wax', 'Wheelchair', 'Wing', 'Women', 'Work', 
-                                    'X-Ray', 'Yellow', 'Zone', 'Post', 'PET/CT', 'Audiology', 'Audiometry', 'Block', 'High', 'Dependency', 'Intensive', 'Lung', 'Function', 'Otorhinolaryngology', 'Ophthalmology'],
+                                    'X-Ray', 'Yellow', 'Zone', 'Post', 'PET/CT', 'Audiology', 'Audiometry', 'Block', 'High', 'Dependency', 'Intensive', 'Lung', 'Function', 'Otorhinolaryngology', 'Ophthalmology', 'approval', 'provisional'],
                     isRemoteUpdate: false,
                     saveTimeout: null,
                     butiran: {
@@ -789,6 +794,15 @@
                         });
                     });
                     return sorted;
+                },
+
+                aplikasiMesyuaratSemasa() {
+                    if (this.userRole === 'urusetia') {
+                        return this.sortedApplications; // Urusetia nampak semua
+                    } else {
+                        // Pegawai hanya nampak nama sendiri
+                        return this.sortedApplications.filter(app => this.currentUser && app.pegawai === this.currentUser.shortName);
+                    }
                 },
                 
                 senaraiHadir() {
@@ -1146,11 +1160,11 @@
                             id: Date.now(),
                             ...this.form,
                             borang: this.form.kategori === 'Hal-hal Lain' ? null : this.form.borang,
-                            statusBPKj: 'Dimajukan untuk semakan',
+                            statusBPKj: '',
                             sebabBPKj: '',
-                            statusDokumen: 'Lengkap',
-                            statusTenaga: 'Mematuhi',
-                            statusLantai: 'Mematuhi',
+                            statusDokumen: '',
+                            statusTenaga: '',
+                            statusLantai: '',
                             rujukanLampiranA: '',
                             keputusan: '',
                             keputusanTeks: '',

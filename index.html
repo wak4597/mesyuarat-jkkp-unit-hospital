@@ -393,17 +393,13 @@
                                 <select v-model="app.statusBPKj" class="w-full border-gray-300 rounded p-1 text-sm bg-white mt-1 border">
                                     <option value="Telah mematuhi">Telah mematuhi</option>
                                     <option value="Tidak mematuhi">Tidak mematuhi</option>
+                                    <option value="Akan dimajukan">Akan dimajukan untuk semakan</option>
                                     <option value="Dimajukan untuk semakan">Dimajukan untuk semakan</option>
                                     <option value="Tidak dikemukakan kerana tidak berkaitan">Tidak dikemukakan kerana tidak berkaitan</option>
                                      <!-- PILIHAN BARU 2 -->
                                     <option value="Tidak dimajukan">Tidak dimajukan kepada pihak BPKj kerana...</option>
                                 </select>
-    
-                                <!-- FIELD BARU 1: Tarikh Maju ke BPKj -->
-                                <input v-if="app.statusBPKj === 'Dimajukan untuk semakan'" v-model="app.tarikhBPKj" type="text" class="w-full border-blue-400 rounded p-1 text-sm bg-blue-50 mt-2 border" placeholder="Tarikh (Cth: 15 Ogos 2026)">
-    
-                                <!-- FIELD BARU 2: Sebab tidak dimajukan -->
-                                <textarea v-if="app.statusBPKj === 'Tidak dimajukan'" v-model="app.sebabBPKj" rows="2" class="w-full border-blue-400 rounded p-1 text-sm bg-blue-50 mt-2 border" placeholder="Nyatakan sebab..."></textarea>
+                                    <textarea v-if="app.statusBPKj === 'Tidak dimajukan'" v-model="app.sebabBPKj" rows="2" class="w-full border-blue-400 rounded p-1 text-sm bg-blue-50 mt-2 border" placeholder="Nyatakan sebab..."></textarea>
                             </div>
                             <div>
                                     <label class="text-xs text-gray-500">Dokumen Sokongan</label>
@@ -577,8 +573,9 @@
                                                         <li v-html="formatItalicLive(`Terima ${app.kategori === 'Berbangkit' ? 'maklum balas' : 'permohonan'} daripada pihak premis pada ${app.tarikhTerima}.`)"></li>
                                                         <li>Pelan lantai yang dikemukakan mengikut skala 1:100.</li>
                                                         <li>
-                                                            <span v-if="app.statusBPKj === 'Dimajukan untuk semakan'">Pelan mekanikal & elektrikal (M&E) dimajukan untuk semakan pihak BPKj pada {{ app.tarikhBPKj || '[Tarikh]' }}.</span>
+                                                            <span v-if="app.statusBPKj === 'Dimajukan untuk semakan'">Pelan mekanikal & elektrikal (M&E) telah dimajukan untuk semakan pihak BPKj.</span>
                                                             <span v-else-if="app.statusBPKj === 'Tidak dimajukan'">Pelan mekanikal & elektrikal (M&E) tidak dimajukan kepada pihak BPKj kerana {{ app.sebabBPKj || '[Sila masukkan sebab]' }}.</span>
+                                                            <span v-else-if="app.statusBPKj === 'Akan dimajukan'">Pelan mekanikal & elektrikal (M&E) akan dimajukan kepada pihak BPKj untuk semakan.</span>
                                                             <span v-else>Pelan mekanikal & elektrikal (M&E) {{ (app.statusBPKj || 'telah mematuhi').toLowerCase() }}.</span>
                                                         </li>
                                                         <li>Dokumen sokongan {{ (app.statusDokumen || 'lengkap').toLowerCase() }}.</li>
@@ -1150,7 +1147,6 @@
                             ...this.form,
                             borang: this.form.kategori === 'Hal-hal Lain' ? null : this.form.borang,
                             statusBPKj: 'Dimajukan untuk semakan',
-                            tarikhBPKj: '',
                             sebabBPKj: '',
                             statusDokumen: 'Lengkap',
                             statusTenaga: 'Mematuhi',

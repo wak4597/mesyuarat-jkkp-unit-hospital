@@ -387,16 +387,25 @@
                             <!-- Status Updates -->
                             <div class="space-y-3 bg-gray-50 p-4 rounded">
                                 <h4 class="font-semibold text-sm uppercase text-gray-600">Maklumat Dokumen & Teknikal</h4>
-                                <div>
-                                    <label class="text-xs text-gray-500">Status M&E (BPKj)</label>
-                                    <select v-model="app.statusBPKj" class="w-full border-gray-300 rounded p-1 text-sm bg-white mt-1 border">
-                                        <option value="Telah mematuhi">Telah mematuhi</option>
-                                        <option value="Tidak mematuhi">Tidak mematuhi</option>
-                                        <option value="Dimajukan untuk semakan">Dimajukan untuk semakan</option>
-                                        <option value="Tidak dikemukakan kerana tidak berkaitan">Tidak dikemukakan kerana tidak berkaitan</option>
-                                    </select>
-                                </div>
-                                <div>
+                                <!-- Status M&E (BPKj) -->
+                            <div>
+                                <label class="text-xs text-gray-500">Status M&E (BPKj)</label>
+                                <select v-model="app.statusBPKj" class="w-full border-gray-300 rounded p-1 text-sm bg-white mt-1 border">
+                                    <option value="Telah mematuhi">Telah mematuhi</option>
+                                    <option value="Tidak mematuhi">Tidak mematuhi</option>
+                                    <option value="Dimajukan untuk semakan">Dimajukan untuk semakan</option>
+                                    <option value="Tidak dikemukakan kerana tidak berkaitan">Tidak dikemukakan kerana tidak berkaitan</option>
+                                     <!-- PILIHAN BARU 2 -->
+                                    <option value="Tidak dimajukan">Tidak dimajukan kepada pihak BPKj kerana...</option>
+                                </select>
+    
+                                <!-- FIELD BARU 1: Tarikh Maju ke BPKj -->
+                                <input v-if="app.statusBPKj === 'Dimajukan untuk semakan'" v-model="app.tarikhBPKj" type="text" class="w-full border-blue-400 rounded p-1 text-sm bg-blue-50 mt-2 border" placeholder="Tarikh (Cth: 15 Ogos 2026)">
+    
+                                <!-- FIELD BARU 2: Sebab tidak dimajukan -->
+                                <textarea v-if="app.statusBPKj === 'Tidak dimajukan'" v-model="app.sebabBPKj" rows="2" class="w-full border-blue-400 rounded p-1 text-sm bg-blue-50 mt-2 border" placeholder="Nyatakan sebab..."></textarea>
+                            </div>
+                            <div>
                                     <label class="text-xs text-gray-500">Dokumen Sokongan</label>
                                     <select v-model="app.statusDokumen" class="w-full border-gray-300 rounded p-1 text-sm bg-white mt-1 border">
                                         <option value="Lengkap">Lengkap</option>
@@ -413,12 +422,15 @@
                                     </div>
                                     <div class="w-1/2">
                                         <label class="text-xs text-gray-500">Pelan Lantai Arkitek</label>
-                                        <select v-model="app.statusLantai" class="w-full border-gray-300 rounded p-1 text-sm bg-white mt-1 border">
+                                        <!-- TAMBAH @change DI SINI -->
+                                        <select v-model="app.statusLantai" @change="if(app.statusLantai === 'Ketidakpatuhan (Rujuk Lampiran A)' && !app.rujukanLampiranA) app.rujukanLampiranA = app.noFail" class="w-full border-gray-300 rounded p-1 text-sm bg-white mt-1 border">
                                             <option value="Mematuhi">Mematuhi</option>
                                             <option value="Ketidakpatuhan (Rujuk Lampiran A)">Ada Ketidakpatuhan (Lampiran A)</option>
                                             <option value="Ketidakpatuhan Minor">Ketidakpatuhan Minor</option>
                                         </select>
-                                    </div>
+    
+                                        <input v-if="app.statusLantai === 'Ketidakpatuhan (Rujuk Lampiran A)'" v-model="app.rujukanLampiranA" type="text" class="w-full border-blue-400 rounded p-1 text-sm bg-blue-50 mt-2 border" placeholder="No. Rujukan Surat...">
+                                </div>
                                 </div>
                             </div>
 
@@ -563,13 +575,17 @@
                                                     <ol class="paren-alpha" style="margin-left: 0px; margin-bottom: 0px; padding-left: 0;">
                                                         <li v-html="formatItalicLive(`Terima ${app.kategori === 'Berbangkit' ? 'maklum balas' : 'permohonan'} daripada pihak premis pada ${app.tarikhTerima}.`)"></li>
                                                         <li>Pelan lantai yang dikemukakan mengikut skala 1:100.</li>
-                                                        <li>Pelan mekanikal & elektrikal (M&E) {{ app.statusBPKj.toLowerCase() }}.</li>
+                                                        <li>
+                                                            <span v-if="app.statusBPKj === 'Dimajukan untuk semakan'">Pelan mekanikal & elektrikal (M&E) dimajukan untuk semakan pihak BPKj pada {{ app.tarikhBPKj || '[Tarikh]' }}.</span>
+                                                            <span v-else-if="app.statusBPKj === 'Tidak dimajukan'">Pelan mekanikal & elektrikal (M&E) tidak dimajukan kepada pihak BPKj kerana {{ app.sebabBPKj || '[Sila masukkan sebab]' }}.</span>
+                                                            <span v-else>Pelan mekanikal & elektrikal (M&E) {{ app.statusBPKj.toLowerCase() }}.</span>
+                                                        </li>
                                                         <li>Dokumen sokongan {{ app.statusDokumen.toLowerCase() }}.</li>
                                                         <li>Cadangan tenaga kerja {{ app.statusTenaga.toLowerCase() }}.</li>
                                                         <li>
                                                             <span v-if="app.statusLantai === 'Mematuhi'">Pelan lantai arkitek mematuhi.</span>
                                                             <span v-if="app.statusLantai === 'Ketidakpatuhan Minor'">Terdapat ketidakpatuhan minor yang memerlukan maklum balas daripada pihak premis.</span>
-                                                            <span v-if="app.statusLantai === 'Ketidakpatuhan (Rujuk Lampiran A)'">Ketidakpatuhan pada pelan lantai arkitek boleh dirujuk pada Lampiran A surat berkaitan.</span>
+                                                            <span v-if="app.statusLantai === 'Ketidakpatuhan (Rujuk Lampiran A)'">Ketidakpatuhan pada pelan lantai arkitek boleh dirujuk pada Lampiran A surat berkaitan <span v-if="app.rujukanLampiranA">(No. Ruj.: {{ app.rujukanLampiranA }})</span>.</span>
                                                         </li>
                                                     </ol>
                                                     
@@ -1126,9 +1142,12 @@
                             ...this.form,
                             borang: this.form.kategori === 'Hal-hal Lain' ? null : this.form.borang,
                             statusBPKj: 'Dimajukan untuk semakan',
+                            tarikhBPKj: '',
+                            sebabBPKj: '',
                             statusDokumen: 'Lengkap',
                             statusTenaga: 'Mematuhi',
                             statusLantai: 'Mematuhi',
+                            rujukanLampiranA: '',
                             keputusan: '',
                             keputusanTeks: '',
                             manualKeputusanEdit: false
